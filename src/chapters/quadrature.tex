@@ -1,0 +1,123 @@
+% !TeX spellcheck = en_US
+\chapter{Quadrature}
+\label{ch:quadrature}
+
+
+
+\section{Introduction}
+\label{sec:introduction}
+
+In general, quadrature is a process by which the calculus problem of determining the integral of a curve is cast as a linear algebra problem whereby a weighted sum of intelligently chosen samples approximates the true value of the integral.
+
+\[ \int_{a}^{b} f(x) \mathrm{d}x \approx \sum_{i=1}^n w_n f(x_n) \]
+
+\section{Basic Theory of Gauss-Legendre Quadrature}
+In Gauss-Legendre quadrature, we obtain the abscissae at which we sample the curve in question using points derived from the Legendre polynomials, and weights chosen wisely to get the best possible approximation given a certain number of degrees of freedom.
+
+\subsection{Legendre Polynomials}
+Legendre polynomials are a set of polynomials forming a basis of the polynomial space up to degree $n$ where $n$ is the order of the highest order polynomial in the set. To obtain the Legendre polynomials we start with the orthogonal set
+
+\[  \{ 1, x, x^2, \ldots , x^n \}  \]
+
+and through the Gram-Schmidt orthogonalization process, with respect to the inner product
+
+\[ \langle p,q \rangle = \int^1_{-1} p(x) q(x) \mathrm{d}x \]
+
+we obtain a new set of orthogonal polynomials that spans the same function space. We then apply constant scalings to the polynomials so that \(P_n(1) = 1\)
+
+These polynomials (scaling included) can also be calculated using Rodrigues' formula
+
+\[  P_n(x) = \frac{1}{2^n n!} \frac{\mathrm{d}^n}{\mathrm{d}x^n} \left(x^2 - 1 \right) ^n  \]
+
+Legendre polynomials have several attractive properties. Here I mention just a few that will be shown to be important momentarily.  First, Legendre polynomials of degree $n$ have exactly $n$ real roots. Second, all the roots of Legendre polynomials fall in the range $(-1,1)$. 
+
+\subsection{Gaussian Weights}
+
+Given a polynomial $p(x)$ of degree $2n-1$, we express $p$ in terms of a polynomial division
+.
+\[ p(x) = q(x) L_n(x) + r(x) \]
+
+where $L_n(x)$ is the $n$th degree Legendre polynomial, and $q(x)$ is some polynomial of degree $\leq n-1$, and $r(x)$ is the remainder of the division of $q$ and $L$ and is also of degree $\leq n-1$.
+
+Integrating, we have
+
+\[ \int_{-1}^{1} p(x) \mathrm{d}x = \int_{-1}^{1} q(x) L_n(x) \mathrm{d}x + \int_{-1}^{1} r(x) \mathrm{d}x \]
+
+First note that the definition of our inner product mentioned earier has appeared, because $q$ and $L$ are, by definition, orthonganal, this first term on the right side equals zero.  We can therefore approximate this part of the integral \textit{exactly} by choosing the abscissae at which to sample the curve to be the roots of the Legendre polynomial of degree $n$, which are all real and conveniently fall between the bounds of intergration.  Doing this will cause the approximation of that term to equate to zero as is its true value.
+
+Next, we can also approximate the second term on the right side \textit{exactly} by intelligently choosing weights.  With $n$ degrees of freedom, we can approximate exactly any polynomial of order $\leq n-1$ which is the order of $r$.  We do this by applying the Vandermonde matrix in this manner
+
+\[
+\begin{bmatrix}
+1    & 1 &  \dots &1 \\
+x_1      & x_2 &  \dots & x_n \\
+x_1^2      & x_2^2 & \dots & x_n \\
+\vdots & \vdots & \vdots & \vdots\\
+x_1^{n-1}      & x_2^{n-1} & \dots & x_n^{n-1}\\
+\end{bmatrix}
+\begin{bmatrix}
+w_1 \\
+w_2 \\
+w_3 \\
+\vdots \\
+w_n \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+2  \\
+0  \\
+\frac{2}{3}  \\
+\vdots \\
+\int_{-1}^1 x^{n-1}  \\
+\end{bmatrix}
+\]
+
+where $x_{n}$ are the $n$th roots of the $n$th degree Legendre polynomial, $w_n$ is the $n$th weighting value, and the right hand side are the true values of the integrals from with bounds [-1, 1] from degree zero up to $n-1$.
+
+We can also calculate the weights using the following formula
+
+\[ w_i = \frac{2(1-x_i^2)}{(n+1)^2 [P_{n+1}(x_i)]^2 } \]
+
+where again $x_i$ are the roots of the $n$th degree Legendre polynomial.
+
+Thus with the intelligent choice of both abscissae and weights, we can approximate \textit{exactly} any polynomial of degree $2n-1$ with only $n$ points. This is the power of Gaussian quadrature.
+
+\subsection{Transforming the Bounds of Integration}
+
+Above we have shown that the integral of any polynomial of degree $2n-1$ with bounds [-1,1] can be approximated exactly using $n$ points. With a simple transformation, we can evaluate the integral with arbitrary bounds [a,b] in the following manner 
+
+\[ \int_{a}^{b} f(x) \mathrm{d}x \approx \frac{b-a}{2} \sum_{i=1}^n w_n f(\xi_n) \]
+
+where 
+
+\[ \xi_n = \frac{b-a}{2}x_n + \frac{a+b}{2} \]
+
+\section{Code Implementation of Gauss-Legendre Quadrature}
+After understanding the basic theory, the implementation becomes relatively simple. In the Julia language, there is a FastGaussQuadrature package the efficiently solves for the abscissae and weights for an $n$th degree approximation, making any efforts of mine to do so redundant. To find the polynomial roots, the package uses analytic expressions up to degree 5, Newton's method up to degree 60, and asymptotic expansion for degree greater than 60. Using that package, an implementation of this quadrature scheme is as follows.
+
+\begin{lstlisting}
+"""
+gaussquadrature(fun, n; lb=-1, ub=1)
+
+Evaluate the numeric integral of the function, fun, from the lowerbound, lb, to the upper bound, ub, using an n-th degree Gauss-Legendre quadrature rule.
+"""
+function gaussquadrature(fun, n; lb=-1, ub=1)
+#compute abscissae and weights using FastGaussQuadrature
+t, w = FastGaussQuadrature.gausslegendre(n)
+
+#transform bounds
+a = (ub-lb).*t./2.0 .+ (lb+ub)/2.0
+d = (ub-lb)/2
+
+#initialize integral
+integral = 0.0
+
+#calculate numeric integral:
+#Evaluate the function (or spline object) at the abscissae and multiply by the weights; sum the values together to obtain an estimate of the integral.
+for i=1:n
+integral += w[i]*d*fun(a[i])
+end
+
+return integral
+end
+\end{lstlisting}
