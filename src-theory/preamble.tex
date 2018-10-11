@@ -1,0 +1,43 @@
+\documentclass[11pt,oneside]{book}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[colorlinks,bookmarks,bookmarksnumbered,allcolors=blue]{hyperref}
+\usepackage[caption=false,justification=raggedright,singlelinecheck=false]{subfig}
+\usepackage{booktabs} % better tables
+\usepackage[capitalise]{cleveref}
+\usepackage{floatrow}
+\floatsetup[table]{capposition=top}
+\usepackage{listings}
+\usepackage[usenames,dvipsnames]{xcolor} 
+
+\graphicspath{{figures/}}
+
+
+
+%%
+%% Julia definition (c) 2014 Jubobs
+%%
+\lstdefinelanguage{Julia}%
+{morekeywords={abstract,break,case,catch,const,continue,do,else,elseif,%
+		end,export,false,for,function,immutable,import,importall,if,in,%
+		macro,module,otherwise,quote,return,switch,true,try,type,typealias,%
+		using,while},%
+	sensitive=true,%
+	alsoother={\$},%
+	morecomment=[l]\#,%
+	morecomment=[n]{\#=}{=\#},%
+	morestring=[s]{"}{"},%
+	morestring=[m]{'}{'},%
+}[keywords,comments,strings]%
+
+\lstset{%
+	% language         = Julia,
+	basicstyle       = \ttfamily\footnotesize,
+	keywordstyle     = \bfseries\color{blue},
+	stringstyle      = \color{magenta},
+	commentstyle     = \color{ForestGreen},
+	showstringspaces = false,
+	breaklines=true,
+}
