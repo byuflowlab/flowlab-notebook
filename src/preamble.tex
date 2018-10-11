@@ -1,4 +1,4 @@
-\documentclass[nofonts]{tufte-book}
+\documentclass[nofonts,notoc]{tufte-book}
 
 % ---- packages ----
 \usepackage{ebgaramond} % Use Garamond Font
@@ -7,7 +7,7 @@
 \usepackage{graphicx} % Needed to insert images into the document
 \usepackage{amsmath} % package for math stuff
 \usepackage{listings}  % for code
-\usepackage[usenames,dvipsnames]{xcolor}  % colors
+% \usepackage[usenames,dvipsnames]{xcolor}  % colors
 
 % --- additional setup ----
 \hypersetup{colorlinks} 
@@ -30,14 +30,20 @@
 }[keywords,comments,strings]%
 
 \lstset{%
-	language         = Julia,
-	basicstyle       = \footnotesize,
+	% language         = Julia,
+	basicstyle       = \ttfamily\footnotesize,
 	keywordstyle     = \bfseries\color{blue},
 	stringstyle      = \color{magenta},
 	commentstyle     = \color{ForestGreen},
 	showstringspaces = false,
 	breaklines=true,
 }
+
+
+% \lstdefinestyle{latex}{
+% 	identifierstyle = \color{magenta}
+% }
+
 
 % ----- new commands -------
 
