@@ -1,11 +1,10 @@
 \input{../preamble}
 
 \begin{document}
-
+	
 \chapter{Quadrature}
 \chapterauthor{Judd Mehr}
 \label{ch:quadrature}
-
 
 
 \section{Introduction}
@@ -14,6 +13,8 @@
 In general, quadrature is a process by which the calculus problem of determining the integral of a curve is cast as a linear algebra problem whereby a weighted sum of intelligently chosen samples approximates the true value of the integral.
 
 \[ \int_{a}^{b} f(x) \mathrm{d}x \approx \sum_{i=1}^n w_n f(x_n) \]
+
+Undergraduate calculus and numerical methods courses often cover rectangle, trapezoid, and simpson's quadrature schemes, and will therefore not be covered here. We will discuss the basics of Gauss-Legendre Quadrature first, a powerful method allowing the exact approximation of polynomial functions.
 
 \section{Basic Theory of Gauss-Legendre Quadrature}
 In Gauss-Legendre quadrature, we obtain the abscissae at which we sample the curve in question using points derived from the Legendre polynomials, and weights chosen wisely to get the best possible approximation given a certain number of degrees of freedom.
@@ -33,7 +34,7 @@ These polynomials (scaling included) can also be calculated using Rodrigues' for
 
 \[  P_n(x) = \frac{1}{2^n n!} \frac{\mathrm{d}^n}{\mathrm{d}x^n} \left(x^2 - 1 \right) ^n  \]
 
-Legendre polynomials have several attractive properties. Here I mention just a few that will be shown to be important momentarily.  First, Legendre polynomials of degree $n$ have exactly $n$ real roots. Second, all the roots of Legendre polynomials fall in the range $(-1,1)$. 
+Legendre polynomials have several attractive properties. Here I mention just a few that will be shown to be important momentarily.  First, Legendre polynomials of degree $n$ have exactly $n$ real roots. Second, all the roots of Legendre polynomials fall in the range $(-1,1)$.
 
 \subsection{Gaussian Weights}
 
@@ -88,11 +89,11 @@ Thus with the intelligent choice of both abscissae and weights, we can approxima
 
 \subsection{Transforming the Bounds of Integration}
 
-Above we have shown that the integral of any polynomial of degree $2n-1$ with bounds [-1,1] can be approximated exactly using $n$ points. With a simple transformation, we can evaluate the integral with arbitrary bounds [a,b] in the following manner 
+Above we have shown that the integral of any polynomial of degree $2n-1$ with bounds [-1,1] can be approximated exactly using $n$ points. With a simple transformation, we can evaluate the integral with arbitrary bounds [a,b] in the following manner
 
 \[ \int_{a}^{b} f(x) \mathrm{d}x \approx \frac{b-a}{2} \sum_{i=1}^n w_n f(\xi_n) \]
 
-where 
+where
 
 \[ \xi_n = \frac{b-a}{2}x_n + \frac{a+b}{2} \]
 
@@ -126,5 +127,10 @@ return integral
 end
 \end{lstlisting}
 
+\section{Application to Strongly Singular Integrals}
+In \hyperref[ch:boundaryelementmethod]{Boundary Element Methods (BEM)}, we often find ourselves evaluating singular integrals. Presented here is one method for doing so, sometimes referred to as the Subtraction of Singularity Method (SST) \label{vocab:subtractionofsingularity} as described by Guiggiani and Casalini.\cite{Guiggiani1987Direct-computat}
 
+ \bibliography{quadrature.bib}{}
+ \bibliographystyle{aiaa} %pick a bibliography style according to where you are publishing.
+ 
 \end{document}
