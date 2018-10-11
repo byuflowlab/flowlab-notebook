@@ -1,4 +1,6 @@
-## Mac Setup
+# Mac Setup
+
+#### Andrew Ning
 
 Almost all of these commands are meant to be executed within Terminal so these instructions expect a basic understanding of Terminal usage.  You should not need to use [sudo](https://en.wikipedia.org/wiki/Sudo) for any command unless otherwise noted.  If you need sudo for anything else that's an indication that you're doing something wrong.  You may not know what some applications or commands are.  Ask your fellow students or me when we next meet.
 
