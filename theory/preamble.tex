@@ -34,6 +34,16 @@
 % \fancyhead[L]{\the\year\ BYU FLOW Lab}
 % \fancyhead[R]{\thepage}
 
+%--- Bibiliography Styling---
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}
+{\chapter*}
+{\section*}
+{}
+{}
+\renewcommand{\bibname}{References}
+
+
 %%
 %% Julia definition (c) 2014 Jubobs
 %%
