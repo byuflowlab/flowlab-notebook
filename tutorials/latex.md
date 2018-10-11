@@ -1,4 +1,6 @@
-## Getting Started with LaTeX
+# Getting Started with LaTeX
+
+#### Andrew Ning
 
 LaTeX is a typesetting language.  Unlike programs like MS Word that are mostly WYSIWYG (what you see is what you get), in LaTeX you use markup to define what you want and the typesetting system will produce a professional looking document for you.  The benefit of this approach is that you can focus on content and not formatting.  For example, you may want to switch a manuscript from one journal to another.  Most conferences and journals provide LaTeX style files, so changing the style of the entire document is as easy as changing one line.  Perhaps the more important benefit for us is the ease with which mathematical content can be inserted into a document.  LaTeX is widely used in scientific publishing.
 
@@ -80,7 +82,7 @@ Header:
 ```
 
 
-## BibTeX with BibDesk
+# BibTeX with BibDesk
 
 The example LaTeX document uses a *.bib file to contain your references.  This file uses BibTeX format, but don't worry, there is no need to learn the format.  Plenty of good tools can manage it for you.  On a Mac I recommend [BibDesk](https://bibdesk.sourceforge.io). JabRef appears to be fairly similar for Linux users, though I won't discuss it here.
 
