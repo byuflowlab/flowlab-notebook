@@ -11,10 +11,20 @@
 \floatsetup[table]{capposition=top}
 \usepackage{listings}
 \usepackage[usenames,dvipsnames]{xcolor} 
+\usepackage{algpseudocode}
+\usepackage{algorithm}
 
 \graphicspath{{figures/}}
 
 
+\makeatletter
+\newcommand{\chapterauthor}[1]{%
+  {\parindent0pt\vspace*{-25pt}%
+  \linespread{1.1}\large\scshape#1%
+  \par\nobreak\vspace*{35pt}}
+  \@afterheading%
+}
+\makeatother
 
 %%
 %% Julia definition (c) 2014 Jubobs

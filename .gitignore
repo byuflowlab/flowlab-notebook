@@ -255,3 +255,5 @@ TSWLatexianTemp*
 *.sta
 
 .DS_Store
+*.key
+*.idraw
