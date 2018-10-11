@@ -1,4 +1,4 @@
 # Theory
 
-- [Quadrature](quadrature.pdf)
-- [Blade Element Momentum](bem.pdf)
+- [Quadrature](quadrature/quadrature.pdf)
+- [Blade Element Momentum](bem/bem.pdf)
