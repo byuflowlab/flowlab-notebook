@@ -1,0 +1,212 @@
+% !TEX root = ../flowbook.tex 
+
+\chapter{Mac Setup}
+\label{ch:macsetup}
+
+Almost all of these commands are meant to be executed within Terminal so these instructions expect a basic understanding of Terminal usage.  You should not need to use \href{https://en.wikipedia.org/wiki/Sudo}{sudo} for any command unless otherwise noted.  If you need sudo for anything else that's an indication that you're doing something wrong.  You may not know what some applications or commands are.  Ask your fellow students or me when we next meet.
+
+\begin{itemize}
+\item Update OS X\footnote{Or open up the Mac App Store, and update all.}:
+\begin{lstlisting}[language=bash]
+$ sudo softwareupdate -ia --verbose
+\end{lstlisting}
+
+\item Install Xcode Command Line Tools\footnote{Includes several useful command line tools, mostly C/C++ compilers, make, etc.}
+\begin{lstlisting}[language=bash]
+$ xcode-select --install
+\end{lstlisting}
+
+\item Install \href{https://brew.sh}{Homebrew}.  Read the home page, and these \href{https://docs.brew.sh/FAQ}{FAQs}.\footnote{Homebrew is a \href{https://en.wikipedia.org/wiki/Package_manager}{package manager}.  Every Linux distribution has one.  This is the best one for a Mac.  Useful for installing/managing command line tools, though for this installation we will use for some GUI apps.}
+\begin{lstlisting}[language=bash]
+$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"   
+\end{lstlisting}
+
+\item Install git\footnote{There is already a system-level git, but it's not general the latest version and you don't want to update system tools as that could break the system.  Instead, you should install your own local version.}:
+\begin{lstlisting}[language=bash]
+$ brew install git
+\end{lstlisting}
+
+\item Install gcc (for gfortran)
+\begin{lstlisting}[language=bash]
+$ brew install gcc
+\end{lstlisting}
+
+\item Install open-mpi
+\begin{lstlisting}[language=bash]
+$ brew install open-mpi
+\end{lstlisting}
+
+\item Install wget\footnote{Mainly just to make some  later steps in this installation easier.}
+\begin{lstlisting}[language=bash]
+$ brew install wget
+\end{lstlisting}
+
+\item Install tools for continuous backup/sync.
+\begin{lstlisting}[language=bash]
+$ brew cask install dropbox
+$ brew cask install box-drive
+\end{lstlisting}
+
+\item Install text editors\footnote{I primarily use VSCode.  Some people prefer Atom.}
+\begin{lstlisting}[language=bash]
+$ brew cask install visual-studio-code
+$ brew cask install atom
+\end{lstlisting}
+
+\item Install communication tools.
+\begin{lstlisting}[language=bash]
+$ brew cask install slack
+$ brew cask install zoomus
+\end{lstlisting}
+
+\item Install Julia is you are going to program in Julia.  If you need a specific version go \href{https://julialang.org/downloads/}{here}.
+\begin{lstlisting}[language=bash]
+$ brew cask install julia
+\end{lstlisting}
+
+\item Install GitHub Desktop if you like to use a GUI for git (I prefer the command line).
+\begin{lstlisting}[language=bash]
+$ brew cask install github-desktop
+\end{lstlisting}
+
+\item AppCleaner does a better job uninstalling applications:
+\begin{lstlisting}[language=bash]
+$ brew cask install appcleaner
+\end{lstlisting}
+
+\item Install MacTeX unless you plan to only use Overleaf for writing LaTeX.
+\begin{lstlisting}[language=bash]
+$ brew cask install mactex
+\end{lstlisting}
+
+\item Update all the LaTeX packages (will take a while).
+\begin{lstlisting}[language=bash]
+$ sudo /Library/TeX/texbin/tlmgr update --self
+$ sudo /Library/TeX/texbin/tlmgr update --all
+\end{lstlisting}
+
+\item Some useful Quick Look plugins.  Some description \href{https://github.com/sindresorhus/quick-look-plugins}{here}.\footnote{Quick Look is when you press spacebar when a file is selected in Finder.}
+\begin{lstlisting}[language=bash]
+$ brew cask install qlcolorcode qlstephen qlmarkdown
+\end{lstlisting}
+
+\item Change some default OS X settings:
+\begin{lstlisting}[language=bash]
+# Expand save panel by default
+$ defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+$ defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+
+# Save to disk (not to iCloud) by default
+$ defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
+
+# Disable smart quotes as they're annoying when typing code
+$ defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+
+# Disable smart dashes as they're annoying when typing code
+$ defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+
+# Disable auto-correct
+$ defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+
+# Set Dropbox as the default location for new Finder windows
+# For other paths, use `PfLo` and `file:///full/path/here/`
+$ defaults write com.apple.finder NewWindowTarget -string "PfDe"
+$ defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Dropbox/"
+
+# Finder: show all filename extensions
+$ defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+
+# auto hide dock
+$ defaults write com.apple.dock autohide -bool true
+killall Dock
+\end{lstlisting}
+
+
+\item Create some config files.  First, improve how tab completion and history search works in Terminal.
+\begin{lstlisting}[language=bash]
+$ cat <<EOT >> ~/.inputrc
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+set show-all-if-ambiguous on
+set completion-ignore-case on
+EOT
+\end{lstlisting}
+
+\item Next, create a file that will allow you to build nomenclature automatically when using LaTeX.
+\begin{lstlisting}[language=bash]
+$ cat <<EOT >> ~/.latexmkrc
+@cus_dep_list = (@cus_dep_list, "nlo nls 0 makenomenclature");
+sub makenomenclature {
+   system("makeindex $_[0].nlo -s nomencl.ist -o $_[0].nls"); }
+EOT
+\end{lstlisting}
+
+\item Create a file called \begin{verbatim}
+~/.bash_profile
+\end{verbatim}and add the following.\footnote{This file is run every time you open a terminal window.  The first shows colors when you use \texttt{ls} in terminal. In the second I like to set the command \texttt{edit} as an alias to open my text editor.  I do this because I've changed text editors over time, but I want to continue use the same command.  For your editor of choice you'll need to also install their command line tools for this to work.  The last removes some extraneous in the command prompt.}
+\begin{lstlisting}[language=bash]
+# colors in ls
+alias ls="ls -G"
+
+# alias for edit (choose one)
+alias edit="/usr/local/bin/code"
+# alias edit="/usr/local/bin/atom"
+
+# simplify command prompt
+export PS1="\W$ "
+\end{lstlisting}
+
+
+\item Configure git.  You may need some \href{http://burnedpixel.com/blog/setting-up-git-and-github-on-your-mac/#done}{additional configuration} for the keychain helper or maybe ssh keys, but in general you shouldn't need to do anything more other than login with your github account the first time.
+\begin{lstlisting}[language=bash]
+$ git config --global user.name "Your Name Here"
+$ git config --global user.email your@email.com
+\end{lstlisting}
+
+\item Install miniconda if you are going to program in  Python.\footnote{Conda is a separate package manager just for Python.  Typically it comes with a bunch of stuff pre-bundled.  The mini version strips it down to the essentials so we can just install what we need.}
+\begin{lstlisting}[language=bash]
+$ cd ~/Downloads
+$ wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh
+$ bash miniconda.sh 
+$ conda update conda
+$ conda install numpy scipy matplotlib swig
+\end{lstlisting}
+
+\item Install an optimizer (Snopt).  The sources files are in our github repo: lab-internal.  For Julia the instructions are in our repo \href{https://github.com/byuflowlab/Snopt.jl}{Snopt.jl}.  For Python you should use \href{https://github.com/mdolab/pyoptsparse}{pyoptsparse}. Follow the same basic procedure:
+\begin{lstlisting}[language=bash]
+$ cp lab-internal/optimizers/snopt7/src/* pyoptsparse/pyoptsparse/pySNOPT/source/
+$ cd pyoptsparse
+python setup.py install
+\end{lstlisting}
+
+\item If you use Python and need openmdao
+\begin{lstlisting}[language=bash]
+$ pip install openmdao
+\end{lstlisting}
+
+\item If you use VSCode, you might want some of these extensions (first for LaTeX, second for Julia)\footnote{There are tons of extensions, and easy to install from within the app.}:
+\begin{lstlisting}[language=bash]
+$ code --install-extension james-yu.latex-workshop
+ julialang.language-julia
+\end{lstlisting}
+
+\item If you prefer Atom, you can do the same:
+\begin{lstlisting}[language=bash]
+$ apm install latextools uber-juno
+\end{lstlisting}
+
+\item If you want Matlab or any Adobe products  (potentially Acrobat and maybe Illustrator) you need to install from \url{https://software.byu.edu}.
+
+\item Microsoft Office you can install from \url{https://office.byu.edu}
+
+
+\item From the Mac App Store I recommend either Better Snap Tool or Magnet.  They allow you to "snap" windows to the sides (or other places) with keyboard shortcuts. Useful for putting two things side by side.  Both allow a lot of customization.
+
+\item I like to use a better theme for Terminal.  Here's one I like.  After downloading, you need to double click and change as default in preferences (might also like to change fonts).
+\begin{lstlisting}[language=bash]
+$ wget https://raw.githubusercontent.com/chriskempson/tomorrow-theme/master/OS%20X%20Terminal/Tomorrow%20Night.terminal
+\end{lstlisting}
+
+\end{itemize}
+
+
