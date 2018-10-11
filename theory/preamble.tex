@@ -1,6 +1,6 @@
 \documentclass[11pt,oneside]{book}
 
-\usepackage[margin=1in]{geometry}
+% \usepackage[margin=1.75in]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage[colorlinks,bookmarks,bookmarksnumbered,allcolors=blue]{hyperref}
@@ -16,15 +16,26 @@
 
 \graphicspath{{figures/}}
 
-
+% --- chapter author -----
 \makeatletter
 \newcommand{\chapterauthor}[1]{%
   {\parindent0pt\vspace*{-25pt}%
   \linespread{1.1}\large\scshape#1%
-  \par\nobreak\vspace*{35pt}}
+  \par\nobreak\vspace*{35pt}
+  \parindent0pt\vspace*{-25pt}%
+  \linespread{1.1} \today%
+  \par\nobreak\vspace*{35pt}
+  }
   \@afterheading%
 }
 \makeatother
+
+% % ---- header ----
+% \usepackage{fancyhdr}
+% \pagestyle{fancy}
+% \fancyhf{}
+% \fancyhead[L]{\the\year\ BYU FLOW Lab}
+% \fancyhead[R]{\thepage}
 
 %%
 %% Julia definition (c) 2014 Jubobs
@@ -51,3 +62,6 @@
 	showstringspaces = false,
 	breaklines=true,
 }
+
+% don't number sections
+\setcounter{secnumdepth}{-1}
