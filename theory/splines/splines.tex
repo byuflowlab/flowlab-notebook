@@ -10,9 +10,88 @@
 \section{Introduction}
 \label{sec:splinesintro}
 
-\section{Shape Functions}
+Splines are useful in many applications. Splines began as physical, rather than mathematical objects. In the ship building, and later the aircraft building, industry, as well as other architectural applications, drafters would use thin pieces of wood or metal called splines that they would bend through key points to create smooth interpolative curves.  Today, splines are used much in the same way, albeit primarily in virtual applications.  In enginnering, splines are most often used for data interpolation and graphic design/representation (CAD). Simply put, splines are piecewise polynomial functions; thus they behave more or less as do polynomials, but have much greater flexibility and are therefore often preferred for accuracy in interpolation and flexibility in design. There are many kinds of splines, but here we discuss Béziers, B-Splines, and NURBS.
 
-\section{Bezier Curves}
+\section{Bézier Curves}
+\subsection{Understanding the Parametric Nature of Bézier Curves}
+Bézeir curve are parametric.  To understand this concept and begin building intuition behind spline structure, we will jump right in and create a basic quadratic Bézier curve. We start with the parametric function $P(u)$, defined as:
+
+\begin{equation}
+\label{eq:parametricrelation}
+P(u) = (1-u)P_0 + uP_1
+\end{equation}
+
+where $u$ is a parameter such that $0 \leq u \leq 1$, and $P_{(\cdot)}$ are 2D control points (note that they are 2D in this example, but are not, in general, limited to 2 dimensions). Notice that when $u=0$ we are at point $P_0$ and when $u=1$ we are at point $P_1$. 
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=3.0in]{para1.pdf}
+	\caption{Primary Parametric Curve.}
+	\label{fig:para1}
+\end{figure}
+
+Next, let's define some parametric points $Q_{(\cdot)}$ as:
+
+\begin{align}
+Q_0 &=  (1-t)P_0 + tP_1 \\
+Q_1 &=  (1-t)P_1 + tP_2
+ \end{align} 
+ 
+Taking the points $Q_{(\cdot)}$ and applying the same equation \ref{eq:parametricrelation}, we can recursively create another parametric curve. Several examples are shown in figure \ref{fig:para2} as we proceed through the range of $u$. If we apply equation \ref{eq:parametricrelation} once more, the connected points create the quadratic curve, $C(t)$
+
+\begin{align}
+C(t) &= (1-t)Q_0 + tQ_1 \\
+&= (1-t)^2P_0 + 2t(1-t)P_1+t^2P_2 
+\end{align} 
+
+as shown in figure \ref{fig:para3}. This recursive application of parametric polynomials defines Bézier curves.
+ 
+ \begin{figure}[htbp]
+ 	\centering
+ 	\includegraphics[width=\textwidth]{para2.pdf}
+ 	\caption{Recursively Defined Parametric Curves.}
+ 	\label{fig:para2}
+ \end{figure}
+
+ 
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=5in]{para3.pdf}
+	\caption{Recursively Defined Quadratic Bézier.}
+	\label{fig:para3}
+\end{figure}
+
+
+\subsection{Bernstein Polynomials}
+Before giving a more concise, more easily implemented defintion for Bézier Curves, let us take a minute to undertand Bernstein polynomials; which are defined as
+
+$$ B_{i,n}(u) = {n\choose i} u^i (1-u)^{n-i} ~~~~~0\leq u \leq1 $$
+
+where $$ {n\choose i} = \frac{n!}{i!(n-i)!} $$
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=3.0in]{bernstein.pdf}
+	\caption{Bernstein polynomials for $n=4$.}
+	\label{fig:bernstein}
+\end{figure}
+
+From figure \ref{fig:bernstein} we can see some important properties of Berstein polynomials. We won't state why they are important just yet, but it will be good to recognize them now.
+
+\begin{enumerate}
+	\item $B_{i,n}(u) > 0$ everywhere in the range of $u$.
+	\item $\sum_{i=0}^n B_{i,n}(u) = 1$ everywhere in the range of $u$.
+	\item $B_{i,n}(u)$ has only one maximum in the range of $u$, at $u=i/n$.
+	\item The set of  $B_{i,n}(u)$ are symmetric about $u=1/2$.
+\end{enumerate}
+
+\subsection{Bézier Curve Definition Based on Bernstein Polynomials}
+
+Bézier curves can be expressed as follows.
+
+$$ \textbf{C}(u) = \sum^n_{i=0}B_{i,n}(u) \textbf{P}_i~~~~~0\leq u \leq1 $$
+
+where $B_{i,n}(u)$ are the basis (sometimes called bledning or shape) functions. For Bézier curves these basis functions are indeed Bernstein polynomials. \(\textbf{P}_i\) are geometric control points.  This formulation (mathematically equivalent to polynomial power basis form derived in like manner to the example of a quadratic curve given above) for Bézier curves is attractive due to its well behaved nature in numerical computations. Furthermore, it tends to be a more intuitive to work with. 
 
 \section{Basis Splines (B-Splines)}
 
@@ -20,9 +99,9 @@
 
 
 
-
- \bibliographystyle{aiaa} 
- \bibliography{splines.bib}{}
+%
+% \bibliographystyle{aiaa} 
+% \bibliography{splines.bib}{}
 
  
 \end{document}
