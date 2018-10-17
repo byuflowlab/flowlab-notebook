@@ -48,7 +48,7 @@ Integrating, we have
 
 \[ \int_{-1}^{1} p(x) \mathrm{d}x = \int_{-1}^{1} q(x) L_n(x) \mathrm{d}x + \int_{-1}^{1} r(x) \mathrm{d}x \]
 
-First note that the definition of our inner product mentioned earier has appeared, because $q$ and $L$ are, by definition, orthonganal, this first term on the right side equals zero.  We can therefore approximate this part of the integral \textit{exactly} by choosing the abscissae at which to sample the curve to be the roots of the Legendre polynomial of degree $n$, which are all real and conveniently fall between the bounds of intergration.  Doing this will cause the approximation of that term to equate to zero as is its true value.
+First note that the definition of our inner product mentioned earlier has appeared, because $q$ and $L$ are, by definition, orthogonal, this first term on the right side equals zero.  We can therefore approximate this part of the integral \textit{exactly} by choosing the abscissae at which to sample the curve to be the roots of the Legendre polynomial of degree $n$, which are all real and conveniently fall between the bounds of integration.  Doing this will cause the approximation of that term to equate to zero as is its true value.
 
 Next, we can also approximate the second term on the right side \textit{exactly} by intelligently choosing weights.  With $n$ degrees of freedom, we can approximate exactly any polynomial of order $\leq n-1$ which is the order of $r$.  We do this by applying the Vandermonde matrix in this manner
 
