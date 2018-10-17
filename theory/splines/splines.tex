@@ -65,9 +65,9 @@ as shown in figure \ref{fig:para3}. This recursive application of parametric pol
 \subsection{Bernstein Polynomials}
 Before giving a more concise, more easily implemented defintion for Bézier Curves, let us take a minute to undertand Bernstein polynomials; which are defined as
 
-$$ B_{i,n}(u) = {n\choose i} u^i (1-u)^{n-i} ~~~~~0\leq u \leq1 $$
+\begin{equation} B_{i,n}(u) = {n\choose i} u^i (1-u)^{n-i} ~~~~~0\leq u \leq1 \end{equation}
 
-where $$ {n\choose i} = \frac{n!}{i!(n-i)!} $$
+where \begin{equation} {n\choose i} = \frac{n!}{i!(n-i)!} \end{equation} 
 
 \begin{figure}[htbp]
 	\centering
@@ -89,15 +89,81 @@ From figure \ref{fig:bernstein} we can see some important properties of Berstein
 
 Bézier curves can be expressed as follows.
 
-$$ \textbf{C}(u) = \sum^n_{i=0}B_{i,n}(u) \textbf{P}_i~~~~~0\leq u \leq1 $$
+\begin{equation} \textbf{C}(u) = \sum^n_{i=0}B_{i,n}(u) \textbf{P}_i~~~~~0\leq u \leq1 \end{equation}
 
-where $B_{i,n}(u)$ are the basis (sometimes called bledning or shape) functions. For Bézier curves these basis functions are indeed Bernstein polynomials. \(\textbf{P}_i\) are geometric control points.  This formulation (mathematically equivalent to polynomial power basis form derived in like manner to the example of a quadratic curve given above) for Bézier curves is attractive due to its well behaved nature in numerical computations. Furthermore, it tends to be a more intuitive to work with. 
+where $B_{i,n}(u)$ are the basis (sometimes called bledning or shape) functions. For Bézier curves, these basis functions are indeed Bernstein polynomials. \(\textbf{P}_i\) are geometric control points.  This formulation (mathematically equivalent to polynomial power basis form derived in like manner to the example of a quadratic curve given above) for Bézier curves is attractive due to its well behaved nature in numerical applications. Furthermore, it tends to be relatively intuitive to work with.
 
 \section{Basis Splines (B-Splines)}
 
+\subsection{B-Spline Basis Functions}
+Let us first begin by defining a knot vector, $U = \{u_1, u_2  \ldots u_{m}\}$, where the knots $u_i$ are non-decreasing.  (The full importance of the knot vector will be clear later.) Using this knot vector we define $N_{i,p}(u)$, the $i$th basis function of degree $p$ (note that degree and order are not synonymous when speaking of splines; in general, order = $p+1$) using the Cox-deBoor algorithm:
+
+\begin{equation} 
+N_{i,0}(u) = 
+\begin{cases} 
+1 & \text{if  } u_i \leq u < u_{i+1} \\
+0 & \text{otherwise}
+\end{cases} 
+\end{equation}
+
+\begin{equation} N_{i,p}(u) = \frac{u-u_i}{u_{i+p}-u_i} N_{i,p-1}(u) + \frac{u_{i+p+1}-u}{u_{i+p+1}-u_{i+1}}N_{i+1,p-1}(u) \end{equation}
+
+\bigskip
+
+This algorithm can be visualized as a triangular scheme:
+\begin{equation}
+\begin{matrix}
+	N_{0,0}(u) & \rightarrow & N_{0,1}(u) & \cdots & N_{0,p-1}(u) & \rightarrow & N_{0,p}(u)\\ 
+	& \nearrow &  &  &  & \nearrow & \\ 
+	N_{1,0}(u) & \rightarrow & N_{1,1}(u) & \cdots & N_{1,p-1}(u) &  & \\ 
+	\vdots &  & \vdots &  &  &  & \\ 
+	N_{n-1,0}(u) & \rightarrow & N_{n-1,1}(u) &  &  &  & \\ 
+	& \nearrow &  &  &  &  & \\ 
+	N_{n,0}(u) &  &  &  &  &  & \\ 
+\end{matrix}
+\end{equation}
+
+The derivative of a basis function, $N_{i,p}(u)$, is given by
+
+\begin{equation}N_{i,p}'(u) = \frac{p}{u_{i+p} - u_i} N_{i,p-1}(u) - \frac{p}{u_{i+p+1} - u_{i+1}} N_{i+1,p-1}(u)  \end{equation}
+
+In general, the $k$th derivative is given by
+
+\begin{equation}N_{i,p}^{(k)}(u) = p \left( \frac{N_{i,p-1}^{(k-1)}(u)}{u_{i+p} - u_i} - \frac{N_{i+1,p-1}^{(k-1)}(u)}{u_{i+p+1} - u_{i+1}} \right) \end{equation}
+
+or in terms of $N_{i,p-k}(u), \ldots, N_{i+k,p-k}(u)$ rather than derivatives:
+
+\begin{equation} N_{i,p}^{(k)}(u) = \frac{p!}{(p-k)!} \sum^k_{j=0} a_{k,j} N_{i+j,p-k}(u)  \end{equation}
+
+with
+
+\begin{align}
+a_{0,0} &= 1\\
+a_{k,0} &= \frac{a_{k-1,0}}{u_{i+p-k+1} - u_i}\\
+a_{k,j} &= \frac{a_{k-1,j} - a_{k-1,j-1}}{u_{i+p+j-k+1} - u_{i+j} } ~~~ j=1,\ldots,k-1\\
+a_{k,k} &= \frac{-a_{k-1,k-1}}{u_{i+p+1} - u_{i+k} }
+\end{align}
+
+
+\subsection{B-Spline Definition}
+A B-Spline is a series of Bézier curves joined end to end.  The definition of a B-Spline is
+
+\begin{equation} \textbf{C}(u) = \sum^n_{i=0}N_{i,p}(u) \textbf{P}_i~~~~~a\leq u \leq b \end{equation}
+
+and has derivative
+
+\begin{equation} \textbf{C}^{(k)}(u) = \sum^n_{i=0}N^{(k)}_{i,p}(u) \textbf{P}_i~~~~~a\leq u \leq b \end{equation}
+
+where $\textbf{P}_i$ are control points and $N_{i,p}(u) $ are the basis functions previously defined. A $p$th degree B-Spline has $n+1$ basis functions, where $n = m-p-1$, and the number of knots, $u_i$, in the knot vector, $U$, over which the spline is defined, is $m+1$ and the first and last knots are repeated $p+1$ times.
+ 
+\begin{equation} U = \{\underbrace{a,\ldots,a}_{p+1},u_{p+1},\ldots,u_{m-p-1},\underbrace{b,\ldots,b}_{p+1} \}  \end{equation}
+
+
+
+
 \section{Non-uniform Rational B-Splines (NURBS)}
 
-
+\section{Tensor Product Surfaces}
 
 %
 % \bibliographystyle{aiaa} 
