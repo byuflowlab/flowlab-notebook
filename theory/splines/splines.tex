@@ -162,6 +162,45 @@ where $\textbf{P}_i$ are control points and $N_{i,p}(u) $ are the basis function
 
 
 \section{Non-uniform Rational B-Splines (NURBS)}
+Now that we have a basic understanding of B-Splines, we can move on to NURBS, which are just a superset of B-Splines, but are therefore slightly  more useful. We will look at a few useful things we can do with splines, applied to NURBS.
+
+\subsection{NURBS Definition}
+NURBS can be thought of as weighted B-Splines, and are defined as follows:
+
+\begin{equation}\label{eqn:nurbsdef} \textbf{C}(u) = \frac{ \displaystyle \sum^n_{i=0}N_{i,p}(u) w_i \textbf{P}_i }{ \displaystyle \sum^n_{i=0}N_{i,p}(u) w_i }~~~~~a\leq u \leq b \end{equation}  
+
+Where again $\textbf{P}_i$ are the control points, and $\{w_i\}$ are the weights and the knot vector, $U$ is defined as before except that the knots specifically need \textit{not} be uniform.
+
+To simplify this expression, we can define rational basis functions
+
+\begin{equation} R_{i,p}(u) = \frac{ N_{i,p}(u) w_i } { \displaystyle \sum^n_{i=0}N_{i,p}(u) w_i }\end{equation}  
+
+and our expression becomes
+
+\begin{equation} \textbf{C}(u) = \sum^n_{i=0} R_{i,p}(u) \textbf{P}_i  \end{equation}  
+
+\subsection{NURBS Derivatives}
+We can also express the definition of a NURBS curve as
+
+\begin{equation} \textbf{C}(u) = \frac{ w(u) \textbf{C}(u) }{ w(u) } = \frac{ \textbf{A}(u) }{ w(u) }   \end{equation}  
+
+where $\textbf{A}(u) $ is the numerator of equation \ref{eqn:nurbsdef}.
+
+The derivative, $\textbf{C}'(u)$, can then be expressed as
+
+\begin{equation} \textbf{C}'(u) = \frac{ \textbf{A}'(u) - w'(u) \textbf{C}(u) }{ w(u) }   \end{equation}
+
+and the $k$th derivative, $\textbf{C}^{ (k) }  (u)$, can be expressed as
+
+\begin{equation} \textbf{C}^{(k)}(u) = \frac{ \textbf{A}^{(k)}(u) - \displaystyle \sum^k_{i=1} w^{(i)} (u) \textbf{C}^{(k-i)} (u) }{ w(u) }   \end{equation}
+
+\subsection{Degree Elevation}
+Degree elevation, sometimes called p-refinement, is a process by which a p-degree spline is represented exactly in a higher order space.
+
+\subsection{Knot Insertion}
+Knot insertion, sometimes called h-refinement, is a process by which extra knots are inserted into the knot vector, basically adding more Bézier curves to the spline where the knots are inserted, allowing for greater curve flexibility without increase the curve order.
+
+
 
 \section{Tensor Product Surfaces}
 
