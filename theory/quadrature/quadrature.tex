@@ -127,8 +127,110 @@ return integral
 end
 \end{lstlisting}
 
+
+
 \section{Application to Strongly Singular Integrals}
-In \hyperref[ch:boundaryelementmethod]{Boundary Element Methods (BEM)}, we often find ourselves evaluating singular integrals. Presented here is one method for doing so, sometimes referred to as the Subtraction of Singularity Method (SST) \label{vocab:subtractionofsingularity} as described by Guiggiani and Casalini.\cite{Guiggiani1987Direct-computat}
+In \hyperref[ch:boundaryelementmethod]{Boundary Element Methods (BEM)}, we often find ourselves evaluating singular integrals. Presented here is one method for doing so, sometimes referred to as the Subtraction of Singularity Method (SST) \label{vocab:subtractionofsingularity} as described by Guiggiani and Casalini,\cite{Guiggiani1987Direct-computat} where the integral over singularities of order $1/d$ are approximated by calculating the Cauchy principal value.
+
+\subsection{Cauchy Principal Values}
+The definition with the Cauchy principal value denoted by $\fint$ is given as
+
+\begin{equation} \fint_{\Gamma} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{s_i}^{s_p -\varepsilon} + \int_{s_p + \varepsilon}^{s_f}  \right] \end{equation}
+
+As we can see, this allows us to, in a manner of speaking, integrate over a range $\Gamma$ from $s_i$ to $s_f$ with a singularity present at $s_p$ where $s$ are curvilinear abscissae along a curve, $\Gamma$. See figure \ref{fig:cauchypv} for a representation of the integrand.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.5\textwidth]{cauchypv.png}
+	\caption{Example geometry over which an integral is taken in the Cauchy principal value sense, where P represents the location of a singularity.\cite{Guiggiani1987Direct-computat}}
+	\label{fig:cauchypv}
+\end{figure}
+
+\subsection{Calculating Cauchy Principal Value Integrals}
+To show how to compute the Cauchy principal value integral we begin with the expression
+
+\begin{equation}
+\int_{\Gamma} g(s) ds
+\end{equation}
+
+where the integrand, $g(s)$ is some function with a singularity within the range of $\Gamma$. Let us define two elements in $\Gamma$, $\Gamma_b$, ranging from $s_i$ to $s_p$, and $\Gamma_a$, ranging from $s_p$ to $s_f$ such that the singular point, $P$, is at the junction of the two elements (again, see figure \ref{fig:cauchypv}).
+
+Let us now perform a transformation of variables, such that the bounds of integration over $\Gamma_a$ and $\Gamma_b$ will be $[-1,1]$ (a convenient practice in the implementation of boundary element methods). This gives us functions $g_a(\xi)$ and $g_b(\xi)$, and $\mathrm{d}s = J(\xi) \mathrm{d}\xi$ where $J(\xi) = \mathrm{d}s/\mathrm{d}\xi$, We then write the Cauchy principal value expression as
+
+
+\begin{equation}
+\fint_{\Gamma_b + \Gamma_a} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{-1}^{1 -\Delta \xi_b} g_b(\xi) J_b(\xi) \mathrm{d}\xi + \int_{-1 + \Delta \xi_a}^{1} g_a(\xi) J_a(\xi) \mathrm{d}\xi \right]
+\end{equation}
+
+furthermore, let $g_a(\xi) = f(\xi)/\xi+1$ and $g_b(\xi) = f(\xi)/\xi-1$ such that we now have
+
+\begin{equation}
+\fint_{\Gamma_b + \Gamma_a} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{-1}^{1 -\Delta \xi_b} \frac{f_b(\xi)}{\xi-1} J_b(\xi) \mathrm{d}\xi + \int_{-1 + \Delta \xi_a}^{1} \frac{f_a(\xi)}{\xi+1} J_a(\xi) \mathrm{d}\xi \right]
+\end{equation}
+
+By expanding $\varepsilon$ in its Taylor series, we can relate $\xi$ and $\varepsilon$
+
+\begin{equation}
+\varepsilon = J_b(1) \Delta \xi_b + O(\Delta \xi_b^2) = J_a(-1) \Delta \xi_a + O(\Delta \xi_a^2)
+\end{equation}
+
+Thus $\Delta \xi_b = \varepsilon/J_b(1)$ and $\Delta \xi_a = \varepsilon/J_a(-1)$. Rewriting the bounds this way, we have 
+
+\begin{equation}
+\fint_{\Gamma_b + \Gamma_a} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{-1}^{1 -\varepsilon/J_b(1)} \frac{f_b(\xi)}{\xi-1} J_b(\xi) \mathrm{d}\xi + \int_{-1 + \varepsilon/J_a(-1)}^{1} \frac{f_a(\xi)}{\xi+1} J_a(\xi) \mathrm{d}\xi \right]
+\end{equation}
+
+Now let $h(\xi) = f(\xi)J(\xi)$ for brevity. 
+
+\begin{equation}
+\fint_{\Gamma_b + \Gamma_a} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{-1}^{1 -\varepsilon/J_b(1)} \frac{h_b(\xi)}{\xi-1} \mathrm{d}\xi + \int_{-1 + \varepsilon/J_a(-1)}^{1} \frac{h_a(\xi)}{\xi+1} \mathrm{d}\xi \right]
+\end{equation}
+
+Noting that $h(\xi)$ is a regular, continuous function over each element, $\Gamma_a$ and $\Gamma_b$, and that $h_b(1) = h_a(-1)$ we do the following:
+
+\[
+\begin{aligned}
+\fint_{\Gamma_b + \Gamma_a} &= 
+\lim_{ \varepsilon \rightarrow 0^+} 
+\biggl[ 
+\int_{-1}^{1 -\varepsilon/J_b(1)} \frac{h_b(\xi)+h_b(1)-h_b(1)}{\xi-1} \mathrm{d}\xi \\
+&~~~ +\int_{-1 + \varepsilon/J_a(-1)}^{1} \frac{h_a(\xi)+h_a(-1)-h_a(-1)}{\xi+1} \mathrm{d}\xi 
+\biggr] \\
+&= 
+\lim_{ \varepsilon \rightarrow 0^+} 
+\biggl[
+\int_{-1}^{1 -\varepsilon/J_b(1)} \frac{h_b(\xi)-h_b(1)}{\xi-1} \mathrm{d}\xi + \int_{-1}^{1 -\varepsilon/J_b(1)} \frac{h_b(1)}{\xi-1} \mathrm{d}\xi\\
+&~~~~+
+\int_{-1 + \varepsilon/J_a(-1)}^{1} \frac{h_a(\xi)-h_a(-1)}{\xi+1} \mathrm{d}\xi + \int_{-1 + \varepsilon/J_a(-1)}^{1} \frac{h_a(-1)}{\xi+1} \mathrm{d}\xi
+\biggr]
+\end{aligned}
+\]
+
+We then evaluate the terms we added to both integrals as follows (remembering that $h_b(1) = h_a(-1)$).
+\[
+\begin{aligned}
+& ~~~~\int_{-1}^{1 -\varepsilon/J_b(1)} \frac{h_b(1)}{\xi-1} \mathrm{d}\xi + \int_{-1 + \varepsilon/J_a(-1)}^{1} \frac{h_a(-1)}{\xi+1} \mathrm{d}\xi  \\
+&=\left[ h_b(1) \ln\big|\xi-1\big|\right]_{-1}^{1 -\varepsilon/J_b(1)} + \left[ h_a(-1)\ln\big|\xi+1\big|\right]_{-1 + \varepsilon/J_a(-1)}^{1} \\
+&= h_b(1)\left(\ln\big|\cancel{1}-\frac{\varepsilon}{J_b(1)} - \cancel{1}\big| - \ln\big|-1-1\big| \right) \\
+&~~~~~+ h_a(-1)\left(\ln\big|1+1\big| - \ln\big|\cancel{-1}+\frac{\varepsilon}{J_a(-1)} + \cancel{1}\big| \right)
+\\
+&= h_b(1)\left(\cancel{\ln\big|\varepsilon\big|} - \ln\big|J_b(1) \big| - \cancel{\ln\big|2\big|} \right) + h_a(-1)\left(\cancel{\ln\big|2\big|} - \cancel{\ln\big|\varepsilon\big|} + \ln\big|J_a(-1)\big| \right)\\
+& = -h_b(1) \ln \big|J_b(1)\big| +h_a(-1) \ln \big|J_a(-1)\big|
+\end{aligned}
+\]
+
+which we can see is unaffected by the limit. We also note that the integrands in the limit are now regular, so removing the limit (taking $\varepsilon$ to zero) yields.
+
+\begin{equation}
+\begin{split}
+\fint_{\Gamma_b + \Gamma_a} &= \int_{-1}^{1} \frac{h_b(\xi)-h_b(1)}{\xi-1} \mathrm{d}\xi \\
+&~~~~~+ \int_{-1}^{1} \frac{h_a(\xi)-h_a(-1)}{\xi+1} \mathrm{d}\xi\\ 
+&~~~~~~~- h_b(1) \ln \big|J_b(1)\big| + h_a(-1) \ln \big|J_a(-1)\big|
+\end{split}
+\end{equation}
+
+We now have two regular integrals that can be evaluated with standard Gaussian quadrature, and two logarithmic terms to compute the Cauchy principal value.
+
 
  \bibliographystyle{aiaa} 
  \bibliography{quadrature.bib}{}
