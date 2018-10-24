@@ -12,7 +12,7 @@
 
 In general, quadrature is a process by which the calculus problem of determining the integral of a curve is cast as a linear algebra problem whereby a weighted sum of intelligently chosen samples approximates the true value of the integral.
 
-\begin{equation} \int_{a}^{b} f(x) \mathrm{d}x \approx \sum_{i=1}^n w_n f(x_n) \end{equation}
+\begin{equation}\label{eqn:quadrature} \int_{a}^{b} f(x) \mathrm{d}x \approx \sum_{i=1}^n w_n f(x_n) \end{equation}
 
 Undergraduate calculus and numerical methods courses often cover rectangle, trapezoid, and simpson's quadrature schemes, and will therefore not be covered here. We will discuss the basics of Gauss-Legendre Quadrature first, a powerful method allowing the exact approximation of polynomial functions.
 
@@ -128,20 +128,19 @@ end
 \end{lstlisting}
 
 
-
 \section{Application to Strongly Singular Integrals}
-In \hyperref[ch:boundaryelementmethod]{Boundary Element Methods (BEM)}, we often find ourselves evaluating singular integrals. Presented here is one method for doing so, sometimes referred to as the Subtraction of Singularity Method (SST) \label{vocab:subtractionofsingularity} as described by Guiggiani and Casalini,\cite{Guiggiani1987Direct-computat} where the integral over singularities of order $1/d$ are approximated by calculating the Cauchy principal value.
+In \hyperref[ch:boundaryelementmethod]{Boundary Element Methods (BEM)}, we often find ourselves evaluating singular integrals. Presented here is one method for doing so. Sometimes referred to as the Subtraction of Singularity Method (SST) \label{vocab:subtractionofsingularity} as described by Guiggiani and Casalini,\cite{Guiggiani1987Direct-computat} this method, in which the integral over singularities of order $1/d$ are approximated by calculating the Cauchy principal value, is specifically applicable to Isogeometric BEM (IGABEM) problems where the geometry and physics are represented in terms of basis functions.
 
 \subsection{Cauchy Principal Values}
 The definition with the Cauchy principal value denoted by $\fint$ is given as
 
 \begin{equation} \fint_{\Gamma} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{s_i}^{s_p -\varepsilon} + \int_{s_p + \varepsilon}^{s_f}  \right] \end{equation}
 
-As we can see, this allows us to, in a manner of speaking, integrate over a range $\Gamma$ from $s_i$ to $s_f$ with a singularity present at $s_p$ where $s$ are curvilinear abscissae along a curve, $\Gamma$. See figure \ref{fig:cauchypv} for a representation of the integrand.
+As we can see, this allows us to, in a manner of speaking, integrate over a range $\Gamma$ from $s_i$ to $s_f$ with a singularity present at $s_p$ where $s$ are curvilinear abscissae along a curve, $\Gamma$. See figure \ref{fig:cauchypv} for a representation of the integral bounds.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=0.5\textwidth]{cauchypv.png}
+	\includegraphics[width=0.35\textwidth]{cauchypv.png}
 	\caption{Example geometry over which an integral is taken in the Cauchy principal value sense, where P represents the location of a singularity.\cite{Guiggiani1987Direct-computat}}
 	\label{fig:cauchypv}
 \end{figure}
@@ -150,19 +149,25 @@ As we can see, this allows us to, in a manner of speaking, integrate over a rang
 To show how to compute the Cauchy principal value integral we begin with the expression
 
 \begin{equation}
-\int_{\Gamma} g(s) ds
+\int_{\Gamma} T(P,Q) u(s) ds
 \end{equation}
 
-where the integrand, $g(s)$ is some function with a singularity within the range of $\Gamma$. Let us define two elements in $\Gamma$, $\Gamma_b$, ranging from $s_i$ to $s_p$, and $\Gamma_a$, ranging from $s_p$ to $s_f$ such that the singular point, $P$, is at the junction of the two elements (again, see figure \ref{fig:cauchypv}).
+where the integrand is some function on the boundary $\Gamma$. The function $T$ is strongly singular, of order $1/d$, where $d=|P-Q|$. Let us define two elements in $\Gamma$, $\Gamma_b$, ranging from $s_i$ to $s_p$, and $\Gamma_a$, ranging from $s_p$ to $s_f$ such that the singular point, $P$, is at the junction of the two elements (again, see figure \ref{fig:cauchypv}).
 
-Let us now perform a transformation of variables, such that the bounds of integration over $\Gamma_a$ and $\Gamma_b$ will be $[-1,1]$ (a convenient practice in the implementation of boundary element methods). This gives us functions $g_a(\xi)$ and $g_b(\xi)$, and $\mathrm{d}s = J(\xi) \mathrm{d}\xi$ where $J(\xi) = \mathrm{d}s/\mathrm{d}\xi$, We then write the Cauchy principal value expression as
+Let us express the function $u$ in terms of basis functions, and perform a transformation of variables on our integral, such that the bounds of integration over $\Gamma_a$ and $\Gamma_b$ will be $[-1,1]$ (a convenient practice in the implementation of boundary element methods). This gives us functions 
+
+\begin{equation}
+\int_{-1}^{1} T(P,Q(\xi)) \sum^{nb}_{c=1} \left[ N^c(\xi) \right] J_b(\xi) \mathrm{d}\xi + \int_{-1}^{1} T(P,Q(\xi)) \sum^{na}_{c=1} \left[ N^c(\xi) \right]  J_a(\xi) \mathrm{d}\xi 
+\end{equation}
+
+where $\mathrm{d}s = J(\xi) \mathrm{d}\xi$ where $J(\xi) = \mathrm{d}s/\mathrm{d}\xi$, and $nb$ and $na$ are the number of basis functions used to define $u$ on the ranges $\Gamma_b$ and $\Gamma_a$ respectively. Only one of the basis functions on each element will be non-zero at the singular point P, so we separate out the regular integrals and compute those with standard Gauss-Legendre quadrature described in equation \ref{eqn:quadrature}. We take the singular integrals, and define $g_a(\xi)$ and $g_b(\xi)$, such that $g(\xi)=T(P,Q(\xi)) N^c(\xi)$, where $c=1$ on $\Gamma_a$ and $c=nb$ on $\Gamma_b$. We then write the Cauchy principal value expression as
 
 
 \begin{equation}
 \fint_{\Gamma_b + \Gamma_a} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{-1}^{1 -\Delta \xi_b} g_b(\xi) J_b(\xi) \mathrm{d}\xi + \int_{-1 + \Delta \xi_a}^{1} g_a(\xi) J_a(\xi) \mathrm{d}\xi \right]
 \end{equation}
 
-furthermore, let $g_a(\xi) = f(\xi)/\xi+1$ and $g_b(\xi) = f(\xi)/\xi-1$ such that we now have
+furthermore, let $g_a(\xi) = f(\xi)/(\xi+1)$ and $g_b(\xi) = f(\xi)/(\xi-1)$ such that we now have
 
 \begin{equation}
 \fint_{\Gamma_b + \Gamma_a} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{-1}^{1 -\Delta \xi_b} \frac{f_b(\xi)}{\xi-1} J_b(\xi) \mathrm{d}\xi + \int_{-1 + \Delta \xi_a}^{1} \frac{f_a(\xi)}{\xi+1} J_a(\xi) \mathrm{d}\xi \right]
@@ -186,7 +191,7 @@ Now let $h(\xi) = f(\xi)J(\xi)$ for brevity.
 \fint_{\Gamma_b + \Gamma_a} = \lim_{ \varepsilon \rightarrow 0^+} \left[ \int_{-1}^{1 -\varepsilon/J_b(1)} \frac{h_b(\xi)}{\xi-1} \mathrm{d}\xi + \int_{-1 + \varepsilon/J_a(-1)}^{1} \frac{h_a(\xi)}{\xi+1} \mathrm{d}\xi \right]
 \end{equation}
 
-Noting that $h(\xi)$ is a regular, continuous function over each element, $\Gamma_a$ and $\Gamma_b$, and that $h_b(1) = h_a(-1)$ we do the following:
+Noting that $h(\xi)$ is a regular, continuous function over each element, $\Gamma_a$ and $\Gamma_b$, and that $h_b(1) = h_a(-1)$ we add and subtract each from the appropriate integral:
 
 \[
 \begin{aligned}
@@ -219,7 +224,7 @@ We then evaluate the terms we added to both integrals as follows (remembering th
 \end{aligned}
 \]
 
-which we can see is unaffected by the limit. We also note that the integrands in the limit are now regular, so removing the limit (taking $\varepsilon$ to zero) yields.
+which we can see are unaffected by the limit. We also note that the integrands in the limit are now regular, so removing the limit (taking $\varepsilon$ to zero) yields.
 
 \begin{equation}
 \begin{split}
@@ -229,7 +234,141 @@ which we can see is unaffected by the limit. We also note that the integrands in
 \end{split}
 \end{equation}
 
-We now have two regular integrals that can be evaluated with standard Gaussian quadrature, and two logarithmic terms to compute the Cauchy principal value.
+We now have two regular integrals that can be evaluated with standard Gaussian quadrature, and two logarithmic terms to compute the Cauchy principal value. It should be noted, that although regular, the $h$ terms may still yield an undefined $0/0$ term at the bounds, so some \textit{small} perturbation should be added to keep these terms defined.
+
+\subsection{Cauchy Principal Value Computation Example}
+
+Let us now apply this method to a very basic example:
+
+\begin{equation}
+\int_{s_2}^{s_4} \frac{s^3+1}{s} \mathrm{d}s
+\end{equation}
+
+which has a singularity at $s=0$ (seen in figure \ref{fig:cpv}), and has the analytic Cauchy principal value:
+
+\begin{equation}
+\fint_{s_2}^{s_4} \frac{s^3+1}{s} \mathrm{d}s = \frac{s_4^3-s_2^3}{3} + \ln \bigl| \frac{s_4}{s_2} \bigr| \approx 3.69314718055994
+\end{equation}
+
+
+Recasting in the form discussed above we have
+
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.75\textwidth]{cpv.pdf}
+	\caption{Graphical interpretation of the desired integral for $s_2=-1$, and $s_4=2$}
+	\label{fig:cpv}
+\end{figure}
+
+
+\begin{equation}
+\int_{0}^{1} \frac{s_b(\xi)^3+1}{s_b(\xi)} \sum^{3}_{c=1} \left[ N^c(\xi) \right] J_b(\xi) \mathrm{d}\xi +\int_{-1}^{0} \frac{s_a(\xi)^3+1}{s_a(\xi)} \sum^{3}_{c=1} \left[ N^c(\xi) \right] J_a(\xi) \mathrm{d}\xi
+\end{equation}
+
+where $s$ is transformed to be in terms of $\xi$ by
+\begin{equation}
+\begin{aligned}
+s_b(\xi) &= s_1N^1(\xi) + s_2N^2(\xi) + s_3N^3(\xi) \text{  on  } \Gamma_b = (-1,0)\\
+s_a(\xi) &= s_3N^1(\xi) + s_4N^2(\xi) + s_5N^3(\xi) \text{  on  } \Gamma_a = (0,1)\\
+\end{aligned}
+\end{equation}
+
+and
+
+\begin{equation}
+\begin{aligned}
+J_b(\xi) &= s_1N^{1'}(\xi) + s_2N^{2'}(\xi) + s_3N^{3'}(\xi) \text{  on  } \Gamma_b = (-1,0)\\
+J_a(\xi) &= s_3N^{1'}(\xi) + s_4N^{2'}(\xi) + s_5N^{3'}(\xi) \text{  on  } \Gamma_a = (0,1)\\
+\end{aligned}
+\end{equation}
+
+where in this case (but in general $s_1$ and $s_5$ are permitted to move)
+\begin{equation}
+\begin{aligned}
+s_1 &= -2\\
+s_2 &= -1\\
+s_3 &= 0\\
+s_4 &= 2\\
+s_5 &= 4\\
+\end{aligned}
+\end{equation}
+
+with the chosen basis functions being the quadratic Lagrangian functions (shown in figure \ref{fig:bases})
+
+\begin{equation}
+\begin{aligned}
+N^1(\xi) &= \frac{\xi(\xi-1)}{2}\\
+N^2(\xi) &= (1+\xi)(1-\xi)\\
+N^3(\xi) &=  \frac{\xi(\xi+1)}{2}\\
+\end{aligned}
+\end{equation}
+
+with derivatives
+
+\begin{equation}
+\begin{aligned}
+N^{1'}(\xi) &= \frac{2\xi-1}{2}\\
+N^{2'}(\xi) &= 1-2\xi\\
+N^{3'}(\xi) &=  \frac{2\xi+1}{2}\\
+\end{aligned}
+\end{equation}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.5\textwidth]{bases.pdf}
+	\caption{Basis Functions, $N^c(\xi)$}
+	\label{fig:bases}
+\end{figure}
+
+The general setup of the elements compared to the bounds of integration can be better understood through an examination of figure \ref{fig:elementdef}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.5\textwidth]{elementdef.png}
+	\caption{Problem geometry definition. Note that the element bounds are \textit{not} the same as the integration bounds for this problem}
+	\label{fig:elementdef}
+\end{figure}
+
+We now split out the integral into regular and singular parts over ranges on either side of the singularity at $s_3$.
+
+\begin{equation}
+\begin{split}
+\int_{0}^{1} \frac{s_b(\xi)^3+1}{s_b(\xi)} \sum^{2}_{c=1} \left[ N^c(\xi) \right] J(\xi) \mathrm{d}\xi
++ \int_{-1}^{0} \frac{s_a(\xi)^3+1}{s_a(\xi)} \sum^{2}_{c=1} \left[ N^c(\xi) \right] J(\xi) \mathrm{d}\xi\\
++ \fint_{0}^{1} \frac{s(\xi)^3+1}{s(\xi)} N^3(\xi) J_b(\xi) \mathrm{d}\xi
++ \fint_{-1}^{0} \frac{s(\xi)^3+1}{s(\xi)} N^1(\xi) J_a(\xi) \mathrm{d}\xi
+\end{split}
+\end{equation}
+
+Focusing now on the Cauchy principal value integrals only, we apply our methodology to obtain
+
+\begin{equation}
+\begin{split}
+\int_{0}^{1+\epsilon} \frac{h_b(\xi)-h_b(1-\epsilon)}{\xi-1} \mathrm{d}\xi
++ \int_{\epsilon-1}^{0} \frac{h_a(\xi)-h_a(\epsilon-1)}{\xi+1} \mathrm{d}\xi\\
+- h_b(1+\epsilon) \ln \big|J_b(1)\big| + h_a(\epsilon-1) \ln \big|J_a(-1)\big|
+\end{split}
+\end{equation}
+
+with $\epsilon$ being some small perturbation ($1\times 10^{-15}$ worked well) so that the numerics work out.
+
+Combining our now regular integrals back with the already regular parts, remembering to include $\epsilon$ in the bounds for clean numerics we have
+
+\begin{equation}
+\begin{split}
+\int_{0}^{1+\epsilon} \frac{s_b(\xi)^3+1}{s_b(\xi)} \sum^{2}_{c=1} \left[ N^c(\xi) \right] J(\xi) \mathrm{d}\xi
++ \int_{\epsilon-1}^{0} \frac{s_a(\xi)^3+1}{s_a(\xi)} \sum^{2}_{c=1} \left[ N^c(\xi) \right] J(\xi) \mathrm{d}\xi\\
++ \int_{0}^{1+\epsilon} \frac{h_b(\xi)-h_b(1-\epsilon)}{\xi-1} \mathrm{d}\xi
++ \int_{\epsilon-1}^{0} \frac{h_a(\xi)-h_a(\epsilon-1)}{\xi+1} \mathrm{d}\xi\\
+- h_b(1+\epsilon) \ln \big|J_b(1)\big| + h_a(\epsilon-1) \ln \big|J_a(-1)\big|
+\end{split}
+\end{equation}
+
+The integrals of which we compute with the standard 3rd order Gaussian-Legendre quadrature as explained above, giving us the result $\approx 3.69314718055994$, which matches the analytic solution to 14 decimal places.
+
+
+
 
 
  \bibliographystyle{aiaa} 
