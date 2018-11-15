@@ -1,0 +1,528 @@
+\input{../preamble}
+
+\usepackage{braket}
+\newcommand*{\E}{\mathrm{E}}  % the expectation operator
+\newcommand*{\bxi}{\boldsymbol{\xi}}
+\newcommand*{\bi}{\mathbf{i}}
+\newcommand*{\bj}{\mathbf{j}}
+\newcommand*{\balpha}{\boldsymbol{\alpha}}
+\newcommand*{\bPhi}{\boldsymbol{\Phi}}
+\newcommand*{\bx}{\mathbf{x}}
+\newcommand*{\bX}{\mathbf{X}}
+\newcommand*{\bI}{\mathbf{I}}
+
+\begin{document}
+
+\chapter{Polynomial Chaos}
+\chapterauthor{Santiago Padr\'{o}n}
+
+Polynomial chaos (PC) is the name of an Uncertainty Quantification (UQ) method that approximates a function with a polynomial expansion made up of orthogonal polynomials. This function has \textit{random variables} as inputs, and we are interested in the effects of the random (uncertain) inputs on the output of this function. Statistics of the output can describe the effects of the inputs. We use the polynomial chaos method to efficiently compute these statistics and the gradients of these statistics.
+
+We first describe the polynomial chaos method for the case of a 1-dimensional random input (\cref{sec:1d_pc}) and then for the $n$-dimensional random input case (\cref{sec:nd_pc}). We then discuss two methods---quadrature and regression---to compute the coefficients used in the PC expansion (\cref{sec:PCcoefficients}). We finish with an extension of polynomial chaos to compute gradients (\cref{sec:GradientStatistics0}).
+
+\section{$1$-dimensional polynomial chaos}
+\label{sec:1d_pc}
+
+Let $R(\xi)$ be a function of interest that depends on the uncertain variable $\xi$. We can approximate the function by a polynomial expansion
+\begin{equation}
+  R(\xi) \approx \hat{R}(\xi) = \sum_{i=0}^p \alpha_i \phi_i(\xi).
+  \label{eq:OneD_expansion}
+\end{equation}
+The approximate response $\hat{R}(\xi)$ is a polynomial of order $p$. Usually, the larger the polynomial order the closer the approximation is to the true response $R(\xi)$.
+
+The polynomial basis $ {\{\phi_i(\xi)\}}_{i=0}^p $ is determined by the distribution of the uncertain variable---the polynomial basis is orthogonal with a weight function that corresponds up to a constant to the probability density function of the uncertain variable. Common random (uncertain) variables (Normal, Uniform, Exponential, Beta) have corresponding classical orthogonal polynomials (Hermite, Legendre, Laguerre, Jacobi)~\cite{Eldred2008}. %We can transform a random variable to the common random variables by the probability integral transform or generalizations of it~\cite{Genest2001}. However, because of the non-linearity introduced by the transformation, it is preferable to generate custom orthogonal polynomials for the arbitrary random variable to preserve the optimal convergence properties of the polynomial chaos expansion~\cite{Eldred2008,Oladyshkin2012}.
+It is necessary to numerically generate orthogonal polynomials for uncertain variables with empirically-determined distributions, such as those obtained from wind conditions, to preserve the optimal convergence property of the polynomial chaos expansion \cite{Oladyshkin2012}. Also, the use of orthogonal polynomials allows us to analytically compute statistics from the polynomial chaos expansion (\cref{sec:1dStatistics}). Details about the numerical generation of orthogonal polynomials can be found in~\cite{Padron2017}. In addition to the orthogonal polynomials, the other component of the expansion \cref{eq:OneD_expansion} are the coefficients $\alpha_i$. The coefficients can be computed either by quadrature or regression as described in \cref{sec:PCcoefficients}.
+
+Once the coefficients are computed, we use the polynomial expansion \cref{eq:OneD_expansion} to inexpensively compute statistics of our function of interest. The mean and variance are a function of the coefficients $\alpha_i$ and are obtained analytically by integrating the expansion and using the orthogonality of the polynomials. Other statistics such as probabilities can be estimated by sampling the polynomial expansion.
+
+\subsection{Mean and variance from the polynomial chaos expansion}
+\label{sec:1dStatistics}
+The mean or expected value of our function $R(\xi)$ is defined by
+\begin{equation}
+	\mu_R = \E[R] = \int_\Omega R(\xi) \rho(\xi)\, d\xi,
+  \label{eq:meanDef}
+\end{equation}
+where $\rho(\xi)$ is the probability density function, and $\Omega$ is the domain of the random variable $\xi$.
+Substituting the polynomial approximation \cref{eq:OneD_expansion} of the function into the mean, we obtain
+\begin{equation}
+  \mu_R = \int_\Omega \sum_{i=0}^p \alpha_i \phi_i(\xi) \rho(\xi)\, d\xi.
+  \label{eq:beginingDerivationMean}
+\end{equation}
+To simplify this expression, we define the inner product $\braket{f, g} = \int_\Omega f(\xi)g(\xi)\rho(\xi)\, d\xi $, and we will use the following: $\phi_0 = 1$ by definition, $ \int_\Omega \rho(\xi)\, d\xi = 1 $ by definition of probability density function and the orthogonality of the polynomials
+\begin{equation}
+  \braket{\phi_i, \phi_j} = \braket{\phi_i^2}\delta_{ij}, \qquad \delta_{ij} =
+	\begin{cases}
+	1, &         \text{if } i=j,\\
+	0, &         \text{if } i\neq j,
+	\end{cases}
+\end{equation}
+from which it follows that
+\begin{equation}
+  \braket{\phi_0, \phi_j} = \braket{1, \phi_j} = \braket{\phi_j} = 0, \qquad \text{for } j\neq0.
+\end{equation}
+Now, we proceed to simplify \cref{eq:beginingDerivationMean} to obtain
+\begin{align}
+  \mu_R & = \int_\Omega \sum_{i=0}^p \alpha_i \phi_i(\xi) \rho(\xi)\, d\xi \\
+	& = \sum_{i=0}^p \alpha_i \int_\Omega \phi_i(\xi) \rho(\xi)\, d\xi \\
+  & = \alpha_0 \int_\Omega \phi_0(\xi) \rho(\xi)\, d\xi + \alpha_1 \int_\Omega \phi_1(\xi) \rho(\xi)\, d\xi + \cdots + \alpha_p \int_\Omega \phi_p(\xi) \rho(\xi)\, d\xi \\
+  & = \alpha_0 \int_\Omega \rho(\xi)\, d\xi + \alpha_1 \int_\Omega 1\cdot\phi_1(\xi) \rho(\xi)\, d\xi + \cdots + \alpha_p \int_\Omega 1\cdot\phi_p(\xi) \rho(\xi)\, d\xi \\
+  & = \alpha_0\cdot 1 + \alpha_1 \braket{1,\phi_1} + \cdots + \alpha_p \braket{1,\phi_p} \\
+  & = \alpha_0 + 0 + \cdots + 0 \\
+  \mu_R & = \alpha_0.
+  \label{eq:PCmean}
+\end{align}
+The mean is the zeroth coefficient.
+
+The variance is defined by
+\begin{align}
+	\sigma_R^2 = \mathrm{Var}[R] & = \E[{(R(\xi) - \E[R(\xi)])}^2] \\
+  & = \E[R{(\xi)}^2] - {(\E[R(\xi)])}^2 \\
+  & = \int_\Omega R{(\xi)}^2 \rho(\xi)\, d\xi - \mu_R^2
+  \label{eq:varDef}
+\end{align}
+% The computational form of the variance. Break up these equations.
+Substituting the polynomial approximation \cref{eq:OneD_expansion} of the function and the mean \cref{eq:PCmean} into the variance we obtain
+\begin{align}
+  \sigma_R^2 & = \int_\Omega \sum_{i=0}^p \alpha_i^2 \phi_i{(\xi)}^2 \rho(\xi)\, d\xi - \alpha_0^2 \\
+  & = \sum_{i=0}^p \alpha_i^2 \int_\Omega \phi_i{(\xi)}^2 \rho(\xi)\, d\xi - \alpha_0^2 \\
+  & = \alpha_0^2 \int_\Omega \phi_0{(\xi)}^2\rho(\xi)\, d\xi + \sum_{i=1}^p \alpha_i^2 \int_\Omega \phi_i{(\xi)}^2 \rho(\xi)\, d\xi - \alpha_0^2 \\
+  & = \alpha_0^2 \cdot 1 + \sum_{i=1}^p \alpha_i^2 \int_\Omega \phi_i{(\xi)}^2 \rho(\xi)\, d\xi - \alpha_0^2 \\
+  & = \sum_{i=1}^p \alpha_i^2 \int_\Omega \phi_i{(\xi)}^2 \rho(\xi)\, d\xi \\
+  \sigma_R^2 & = \sum_{i=1}^p \alpha_i^2 \braket{\phi_i^2(\xi)}. \label{eq:PCvar}
+  \end{align}
+The variance is the sum of the product of the coefficients---excluding the zeroth coefficient---with the inner product $\braket{\phi_i^2(\xi)}$. For a particular polynomial basis, this inner product is easily computed either analytically or by quadrature. Furthermore, the classical orthogonal polynomials have simple relationships for the inner products~\cite{Weisstein}.
+% This last citation is a website, find out the proper way to cite it.
+
+
+\section{$n$-dimensional polynomial chaos}
+\label{sec:nd_pc}
+For the case of multiple uncertain variables \(\bxi = (\xi_1,\xi_2,\ldots,\xi_n)\) and using a multi-index \(\bi=(i_1,i_2,\ldots,i_n)\), we write the multi-dimensional polynomial approximation as
+\begin{equation}
+  R(\bxi) \approx \hat{R}(\bxi) = \sum_{\bi\in \mathcal{I}_p} \alpha_\bi \Phi_\bi(\bxi).
+  \label{eq:ND_expansion}
+\end{equation}
+The multi-dimensional basis functions \(\Phi_\bi(\bxi)\) are given by products of the $1$-dimensional orthogonal polynomials
+\begin{equation}
+	\Phi_\bi(\bxi)  = \prod_{j=1}^n \phi_{i_j}(\xi_j).
+  \label{eq:ndPolynomials}
+\end{equation}
+The multi-dimensional basis functions are also orthogonal when the uncertain variables are independent~\cite{Padron2017}.
+The values of the elements \(i_j\) of the multi-index depend on how the expansion is truncated, i.e., on how the index set \(\mathcal{I}_p\) is defined. There are two common ways in which to define the index set: \textit{total-order expansion} and \textit{tensor-product expansion}.
+
+In \textit{total-order expansion} a total polynomial order bound \(p\) is enforced:
+\begin{equation}
+	\mathcal{I}_p = \{\bi:|\bi| \leq p \}, \qquad |\bi|=i_1+i_2+\cdots +i_n.
+\end{equation}
+For a second-order expansion \(p=2\) over two uncertain dimensions \(n=2\), the index set is
+\begin{equation}
+  \mathcal{I}_p = \left \{\begin{array}{c}
+	(i_1=0,i_2=0),(i_1=1,i_2=0),(i_1=0,i_2=1),\\
+    (i_1=2,i_2=0),(i_1=1,i_2=1),(i_1=0,i_2=2)
+\end{array}\right \},
+\end{equation}
+which produces the following multi-dimensional basis polynomials:
+\begin{equation}
+\begin{alignedat}{2}
+  \Phi_\mathbf{0}(\bxi) & = \phi_0(\xi_1) \phi_0(\xi_2) & & = 1 \\
+  \Phi_\mathbf{1}(\bxi) & = \phi_1(\xi_1) \phi_0(\xi_2) & & = \xi_1 \\
+  \Phi_\mathbf{2}(\bxi) & = \phi_0(\xi_1) \phi_1(\xi_2) & & = \xi_2 \\
+  \Phi_\mathbf{3}(\bxi) & = \phi_2(\xi_1) \phi_0(\xi_2) & & = \xi_1^2-1 \\
+  \Phi_\mathbf{4}(\bxi) & = \phi_1(\xi_1) \phi_1(\xi_2) & & = \xi_1 \xi_2 \\
+  \Phi_\mathbf{5}(\bxi) & = \phi_0(\xi_1) \phi_2(\xi_2) & & = \xi_2^2-1.
+\end{alignedat}
+\label{eq:totalOrderExample}
+\end{equation}
+The last column of \cref{eq:totalOrderExample} depends on the type of the univariate polynomials. The ones shown are the $1$-dimensional Hermite polynomials that correspond to Normal uncertain variables.
+The corresponding \textit{total-order} polynomial approximation is
+\begin{equation}
+  \hat{R}(\bxi) = \sum_{\bi=\mathbf{0}}^{\mathbf{5}}\alpha_\bi \Phi_\bi(\bxi) = \alpha_{\mathbf{0}} \Phi_\mathbf{0}(\bxi) + \alpha_{\mathbf{1}} \Phi_\mathbf{1}(\bxi) + \cdots + \alpha_{\mathbf{5}} \Phi_\mathbf{5}(\bxi).
+\end{equation}
+The total number of terms in an expansion of total order \(p\) and involving \(n\) uncertain variables is given by
+\begin{equation}
+	N_{TO} = \frac{(n+p)!}{n!p!}.
+  \label{eq:NtotalOrder}
+\end{equation}
+
+In \textit{tensor-product expansion} a per-dimension polynomial order bound \(p_j\) is enforced
+\begin{equation}
+	\mathcal{I}_p = \{\bi:i_j \leq p_j, \; j=1,\ldots ,n \}.
+\end{equation}
+For a second-order expansion \(p=2\) over two uncertain dimensions \(n=2\), the index set is
+\begin{equation}
+  \mathcal{I}_p = \left \{\begin{array}{c}
+	(i_1=0,i_2=0),(i_1=1,i_2=0),(i_1=2,i_2=0),\\
+	(i_1=0,i_2=1),(i_1=1,i_2=1),(i_1=2,i_2=1),\\
+    (i_1=0,i_2=2),(i_1=1,i_2=2),(i_1=2,i_2=2)
+\end{array}\right \}
+\end{equation}
+which produces the following multi-dimensional basis polynomials:
+\begin{equation}
+\begin{alignedat}{2}
+  \Phi_\mathbf{0}(\bxi) & = \phi_0(\xi_1) \phi_0(\xi_2) & & = 1 \\
+  \Phi_\mathbf{1}(\bxi) & = \phi_1(\xi_1) \phi_0(\xi_2) & & = \xi_1 \\
+  \Phi_\mathbf{2}(\bxi) & = \phi_2(\xi_1) \phi_0(\xi_2) & & = \xi_1^2-1 \\
+  \Phi_\mathbf{3}(\bxi) & = \phi_0(\xi_1) \phi_1(\xi_2) & & = \xi_2 \\
+  \Phi_\mathbf{4}(\bxi) & = \phi_1(\xi_1) \phi_1(\xi_2) & & = \xi_1 \xi_2 \\
+  \Phi_\mathbf{5}(\bxi) & = \phi_2(\xi_1) \phi_1(\xi_2) & & = (\xi_1^2-1)\xi_2 \\
+  \Phi_\mathbf{6}(\bxi) & = \phi_0(\xi_1) \phi_2(\xi_2) & & = \xi_2^2-1 \\
+  \Phi_\mathbf{7}(\bxi) & = \phi_1(\xi_1) \phi_2(\xi_2) & & = \xi_1 (\xi_2^2-1) \\
+  \Phi_\mathbf{8}(\bxi) & = \phi_2(\xi_1) \phi_2(\xi_2) & & = (\xi_1^2-1) (\xi_2^2-1).
+\end{alignedat}
+\label{eq:tensorOrderExample}
+\end{equation}
+The last column of \cref{eq:tensorOrderExample} depends on the type of the univariate polynomials. The ones shown are the $1$-dimensional Hermite polynomials that correspond to Normal uncertain variables.
+The corresponding \textit{tensor-product} polynomial approximation is
+\begin{equation}
+  \hat{R}(\bxi) = \sum_{\bi=\mathbf{0}}^{\mathbf{8}}\alpha_\bi \Phi_\bi(\bxi) = \alpha_{\mathbf{0}} \Phi_\mathbf{0}(\bxi) + \alpha_{\mathbf{1}} \Phi_\mathbf{1}(\bxi) + \cdots + \alpha_{\mathbf{8}} \Phi_\mathbf{8}(\bxi).
+\end{equation}
+The total number of terms for the \textit{tensor-product expansion} is given by
+\begin{equation}
+	N_{TP} = \prod_{i=1}^n (p_i+1).
+\end{equation}
+Note that for both \textit{total-order expansion} and \textit{tensor-product expansion} the number of terms exhibits an exponential increase with an increase in the number of uncertain dimensions \(n\). This result is known as the \textit{curse of dimensionality}. The \textit{tensor-product expansion} is the preferred approach when the coefficients are computed with quadrature (\cref{sec:PCcoeffQuad}) because of increased monomial coverage and accuracy~\cite{Eldred2009}. The \textit{total-order expansion} is the preferred approach when the coefficients are computed with regression (\cref{sec:PCcoeffReg}) because it keeps the sampling requirements lower~\cite{Eldred2009}.
+
+\subsection{Mean and variance from the polynomial chaos expansion}
+\label{sec:ndStatistics}
+Similarly to the $1$-dimensional expansion, the statistics of the multi-dimensional polynomial chaos expansion \cref{eq:ND_expansion} are a function of the coefficients and are obtained analytically
+\begin{equation}
+  \mu_R = \alpha_{\mathbf{0}}
+\end{equation}
+and
+\begin{equation}
+  \sigma_R^2 = \sum_{\bi\in \mathcal{I}_p\setminus \mathbf{\{0\}}}
+\alpha_{\bi}^2\braket{\Phi_\bi^2(\bxi)},
+\end{equation}
+where \(\mathbf{0}\) is the first multi-index---the one with all zero elements.
+
+
+\section{Calculating polynomial chaos coefficients}
+\label{sec:PCcoefficients}
+The coefficients of the polynomial chaos expansion
+\begin{equation}
+  R(\bxi) \approx \hat{R}(\bxi) = \sum_{\bi\in \mathcal{I}_p} \alpha_\bi \Phi_\bi(\bxi).
+  \tag{\ref{eq:ND_expansion} revisited}
+\end{equation}
+can be calculated via quadrature or by linear regression. The quadrature approach is also known as non-intrusive spectral projection, spectral projection, pseudospectral, stochastic Galerkin, etc. The regression approach is sometimes also referred to as stochastic response surfaces, point collocation or compressed sensing.
+% See if I can get some citations. Of when each method used. I could include my papers too.
+% Say if one works better for certain cases or not, what are the benefits of each one, Does one has more flexibility than the other. Do I cite things in here. What exact names do I use for each one. How do gradients and multi-fidelity fit in for each one. Cross-validation benefit. It doesn't seem like there is a good reference comparing both (Maybe a paper of Mike).
+% These could the same under certain conditions.
+
+\subsection{Quadrature}
+\label{sec:PCcoeffQuad}
+To obtain the coefficients of the polynomial chaos expansion
+\begin{equation}
+  R(\bxi) = \sum_{\bi\in \mathcal{I}_p}  \alpha_\bi \Phi_\bi(\bxi),
+  \label{eq:forProjection}
+\end{equation}
+via quadrature, we take the inner product of both sides of \cref{eq:forProjection} with respect to $\Phi_\mathbf{j}(\bxi)$ to yield\footnote{This projection gives the other names for the quadrature approach.}
+\begin{equation}
+  \braket{R,\Phi_\mathbf{j}} = \sum_{\bi\in \mathcal{I}_p}  \alpha_\bi  \braket{\Phi_\bi, \Phi_\mathbf{j}}.
+  \label{eq:PCprojection}
+\end{equation}
+Making use of the orthogonality of the polynomials
+\begin{equation}
+  \braket{\Phi_\bi, \Phi_\mathbf{j}} =
+  \begin{cases}
+    0 & \text{for } i\neq j \\
+	\braket{\Phi_\bi, \Phi_\bi} =
+      \braket{\Phi_\bi^2} & \text{for } i = j.
+  \end{cases}
+\end{equation}
+and solving for the coefficients in \cref{eq:PCprojection}, we obtain
+\begin{equation}
+  \alpha_\bi = \frac{\braket{R(\bxi),\Phi_\bi(\bxi)}}{\braket{\Phi_\bi^2(\bxi)}} =
+  \frac{1}{{\braket{\Phi_\bi^2(\bxi)}}}
+  \int_\Omega R(\bxi) \Phi_\bi(\bxi) \rho(\bxi)\, d\bxi,
+  \label{eq:coefficients}
+\end{equation}
+where the domain $\Omega$ is the Cartesian product of $1D$ domains $\Omega_j$ for each dimension, $\Omega = \Omega_1 \times \cdots \times \Omega_n$, and $\rho(\bxi) = \prod_{j=1}^n\rho_j(\xi_j)$ is the joint probability density of the stochastic parameters. The inner product $\braket{\Phi_\bi^2(\bxi)}$ is known analytically or inexpensively computed. Thus, most of the computational expense in solving for the coefficients resides in evaluating the model $R(\bxi)$ in the multi-dimensional integral
+
+\begin{equation}
+  \int_\Omega R(\bxi) \Phi_\bi(\bxi)
+  \rho(\bxi)\, d\bxi.
+  \label{eq:integrand}
+\end{equation}
+This integral is solved with quadrature (numerical integration).  We discuss two multi-dimensional quadrature approaches, tensor product quadrature and sparse grid quadrature.
+Note that the zero coefficient in \cref{eq:coefficients} reduces to the definition of the mean
+\begin{equation}
+  \mu_R = \alpha_0 = \int_\Omega R(\bxi) \rho(\bxi)\, d\bxi,
+\end{equation}
+which the direct numerical integration methods attempt to compute directly (\cref{sec:directIntegration}).
+
+\textbf{Tensor product quadrature}.
+Let $\mathcal{U}^i f$ be a quadrature operator with $m_i$ points that approximates a one-dimensional integral
+\begin{equation}
+  \mathcal{U}^i f(\xi) \equiv \sum_{j=1}^{m_i} f(\xi_j^i)w_j^i \approx \int_\Omega f(\xi)\rho(\xi)\, d\xi.
+\end{equation}
+Then for approximating an $n$-dimensional integral, we create a tensor product of the 1-dimensional quadrature operators
+\begin{equation}
+  \mathcal{Q}^n f(\bxi) \equiv (\mathcal{U}^{i_1} \otimes \cdots \otimes \mathcal{U}^{i_n}) f(\bxi) = \sum_{j_1=1}^{m_{i_1}} \cdots \sum_{j_n=1}^{m_{i_n}} f(\xi_{j_1}^{i_1},\ldots,\xi_{j_n}^{i_n})(w_{j_1}^{i_1} \ldots w_{j_n}^{i_n}).
+\end{equation}
+We observe that the tensor product results in summations over all possible combinations of the indices, which results in $\prod_{k=1}^n m_{i_k}$ function evaluations. If all univariate integrations are of the same order $m_{i_k}=m$, then $m^n$ function evaluations are needed to evaluate the multi-dimensional integral numerically. As mentioned above, this exponential increase with the increase in the number of dimensions $n$ is known as the \textit{curse of dimensionality} and renders tensor product quadrature impractical when $n$ is large. To alleviate the \textit{curse of dimensionality} sparse grid methods have been developed (see below).
+
+% Maybe expand more here (Gaussian quadrature)
+A commonly used quadrature operator is Gaussian quadrature because for $m$ points (nodes, function evaluations) it can exactly integrate polynomials of degree $2m-1$.
+For Gaussian quadrature, the nodes locations $\xi_j$ and the weights $w_j>0$ depend on the domain of integration and the weight (density) function $\rho(\xi)$.
+
+When the function evaluation is expensive, and when one is performing a convergence study of the integration, it is desired to be able to reuse the quadrature points of the lower order quadrature. A drawback of Gaussian quadrature is that the quadrature points distribution depends on the number of points $m$, i.e., the model evaluations at the nodes $\xi_j$ for the $m$-point integration cannot be reused in another integration involving a different number of nodes. Nested integration rules overcome this problem by enforcing that the nodes of a given quadrature also feature as nodes of higher-order formulas. The drawback of nested rules is that with $m$ points they can only exactly integrate polynomials up to order $m-1$.
+In practice, this is not a big drawback as the model $R$ is rarely a polynomial and thus the integrand, \cref{eq:integrand}, is not polynomial. For this reason achieving the maximum polynomial degree of exactness does not necessarily produce higher  accuracy~\cite{Trefethen2008}. Examples of nested quadrature are Genz-Keister for normal uncertain variables and Gauss-Patterson for uniform variables.
+%THink of including the levels of the nested, book.
+
+\textbf{Sparse grids}.
+% \label{sec:sparse}
+Sparse grids is a particular type of quadrature that is based on linear combinations of tensor product quadrature operators that result in a significantly smaller number of nodes (function evaluations) while preserving as high a level of accuracy as tensor product quadrature~\cite{Gerstner1998,Olivier2010}. The first method to produce sparse grids was proposed by \cite{Smolyak1963} in the context of multi-dimensional quadrature and interpolation.
+The sparse grid quadrature method can be written as~\cite{Eldred2011}
+\begin{equation}
+  \mathcal{S}(l,n) = \sum_{l+1\leq |\bi| \leq l+n} {(-1)}^{l+n-|\bi|}
+  \binom{n-1}{l+n-|\bi|}\cdot (\mathcal{U}^{i_1} \otimes \cdots \otimes \mathcal{U}^{i_n}),
+\end{equation}
+where $l$ is the level of the sparse grid ($l \in \{0, 1 ,2 , \ldots \}$). Increasing the level of the sparse grid increases the number of quadrature points. The indices $i_k$ define which quadrature is used for the $k$ dimension. These indices are grouped in the multi-index $\bi=(i_1,i_2,\ldots,i_n)$, for which we define $|\bi|=i_1+i_2+ \cdots +i_n$. The relationship between the index $i_k$ and the number of quadrature points $m_{i_k}$ is called the growth rule and is dependent on the quadrature rule used. If the quadrature points are chosen based on a nested quadrature rule, then a nonlinear growth rule results, which approximately doubles $m_{i_k}$ with every increment in $i_k$ (e.g., $m_{i_k}=2^{i_k+1}-1$). If the quadrature points are based on a non-nested quadrature rule, then a linear growth rule results, which allows for finer granularity in the number of points used (e.g., $m_{i_k}=2i_k+1$).
+
+A comparison between tensor grids (tensor product quadrature) and sparse grids in the context of polynomial chaos can be found in~\cite{Eldred2008,Smith2014}, these references include the visualization of the tensor and sparse grids for two-dimensional problems.
+
+%Plot of sparse grid points.
+% % In the thesis include plots of the levels. and explanation of the indices and the number of terms.
+
+\subsection{Regression}
+\label{sec:PCcoeffReg}
+To obtain the coefficients of the polynomial chaos expansion
+\begin{equation}
+  R(\bxi) = \sum_{\bi\in \mathcal{I}_p}  \alpha_\bi \Phi_\bi(\bxi),
+\end{equation}
+via regression, we construct a linear system
+\begin{equation}
+  \bPhi \balpha = R
+  \label{eq:linearsystem}
+\end{equation}
+and solve for the coefficients $\balpha$ that best represent a set of responses $R$. The set of responses is generated by evaluating the model at $m$ uncertain vectors $\bxi$. The uncertain vectors are most commonly chosen by sampling the density of the uncertain variables~\cite{Hosder2007}. Different sampling methods can be used (\cref{sec:SamplingMethods}).
+%or you can picked them to be the quadrature points which under certain conditions the coefficients obtained from the regression will be the same as from quadrature. I think the machine learning book has some details.
+
+Each row of the matrix $\bPhi$ contains the orthogonal polynomials $\Phi_\bj$ evaluated at a sample $\bxi_i$
+\begin{equation}
+  \begin{bmatrix}
+    \Phi_\mathbf{0}(\bxi_1) & \cdots & \Phi_\mathbf{n-1}(\bxi_1) \\
+    \vdots & \ddots & \vdots \\
+    \Phi_\mathbf{0}(\bxi_m)  &\cdots & \Phi_\mathbf{n-1}(\bxi_m)
+  \end{bmatrix}
+  \begin{bmatrix}
+    \alpha_0 \\
+    \vdots \\
+    \alpha_{n-1}
+    \end{bmatrix}
+    =
+  \begin{bmatrix}
+    R_1 \\
+    \vdots \\
+    R_m
+  \end{bmatrix}.
+  \label{eq:linearsystemExpanded}
+\end{equation}
+The size of the $m \times n$ matrix is determined by the number of samples $m$ and by how the polynomial chaos expansion is truncated (\cref{sec:nd_pc}) which results in $n$ terms. It is common to specify a total order expansion along with a collocation ratio\footnote{Collocation ratio derives from collocation points which some authors use to refer to the sample points.} $cr = m/n$ to determine the number of samples $m$. The collocation ratio determines if the system is overdetermined $cr > 1$ or underdetermined $cr < 1$.
+
+The most popular method to estimate the coefficients is \textit{least squares}, in which we pick coefficients $\balpha=(\alpha_0, \alpha_1, \dots, \alpha_{n-1})$ that minimize the residual sum of squares
+\begin{equation}
+  \balpha = \text{arg min } ||\bPhi\balpha - R||_2^2.
+\end{equation}
+This problem has a closed-form solution obtained by solving the normal equations~\cite{Trefethench111997}
+\begin{equation}
+  \balpha = {(\bPhi^T \bPhi)}^{-1} \bPhi^T R.
+\end{equation}
+For underdetermined systems, \cref{eq:linearsystem} has many solutions and we need to further constrain the problem. This can be done be setting a constraint on the coefficients
+\begin{equation}
+  \balpha = \text{arg min } ||\bPhi\balpha - R||_2^2, \qquad \text{such that } ||\balpha||_p \leq t.
+\end{equation}
+This constrained problem is equivalent to the regularized least squares problem~\cite{Boydch62009}
+\begin{equation}
+  \balpha = \text{arg min } ||\bPhi\balpha - R||_2^2 + \lambda ||\balpha||_p^p.
+  \label{eq:regularized}
+\end{equation}
+For $p=2$, \cref{eq:regularized} is known as Tikhonov regularization or ridge regression~\cite{Hoerl1970} and for $p=1$ as $l_1$-norm regularization or as lasso~\cite{Tibshirani1994}.
+
+Similarly to the least squares problem, the ridge regression has a closed-form solution
+\begin{equation}
+  \balpha = {(\bPhi^T \bPhi + \lambda\bI)}^{-1} \bPhi^T R.
+\end{equation}
+Lasso has no closed-form solution. Computing the lasso solution is a quadratic programming problem which can be solved with quadratic programming or by more general convex optimization methods~\cite{Boyd2009}. It can also be solved with an efficient method, least angle regression (LAR or LARS), that computes the Lasso solutions for all values of lambda~\cite{Efron2004}. The best $\lambda$ can be found via cross-validation (below). For a discussion comparing ridge, Lasso and other regression techniques see~\cite{Hastie2009}.
+
+The lasso solution shrinks (compresses) the size of the coefficients and makes some of the coefficients zero, for this reason, these methods are known as compressed sensing methods~\cite{Mathelin2012,Doostan2011}. They have been applied in polynomial chaos to find sparse solutions~\cite{Doostan2011} and with some modifications to find sparse solutions adaptively~\cite{Blatman2011,Jakeman2015} and to introduce a priori information about the solution~\cite{Peng2014}.
+
+For a given number of samples $m$ in the linear system \cref{eq:linearsystemExpanded} we can use cross-validation (below) to pick the best polynomial order $n$ to approximate the response.  We can add additional regression equations to increase $m$ if derivate information is available at the sample points. The additional equations can be beneficial in accurately computing the coefficients~\cite{Jakeman2015,Peng2016}.
+
+\textbf{Cross-validation}.
+Cross-validation is a method to find the vector of coefficients $\balpha$ that approximately minimizes the prediction error
+\begin{equation}
+  e(\hat{R}) = ||R(\bxi) - \hat{R}(\bxi)||_p, \qquad p={1 \text{ or } 2},
+\end{equation}
+where $R(\bxi)$ is our response function, and $\hat{R}(\bxi)$ is the polynomial chaos approximation with the coefficients $\balpha$.
+Given the training data (a set of samples) $\bX$, $K$-fold cross-validation divides $\bX$ into $K$ sets (folds) $\bX_k$, $k=1,\dots,K$ of equal size and uses part of the data ($\bX$ with $\bX_k$ removed) to fit the model (construct the PC approximation) and a different part of the data $(\bX_k)$ to test the model. The cross-validation error is calculated by averaging the errors for each of the $k$ folds
+\begin{equation}
+  CV(\hat{R}) = \frac{1}{K} \sum_{k=1}^K e(\hat{R}^{-k}),
+\end{equation}
+where $\hat{R}^{-k}$ is the PC approximation computed with $k$th part of the data removed.
+
+Given a set of polynomial chaos expansions $\hat{R}_\beta$ with tuning parameters $\beta$ (which can be the polynomial order or the $\lambda$ in the lasso problem), cross-validation can be used to pick the parameters that minimize the cross-validation error
+\begin{equation}
+  \beta^\star = \text{arg min}_\beta \; CV(\hat{R}_\beta),
+\end{equation}
+to construct the final ``best'' PC approximation $(\hat{R}_{\beta^\star})$ with all the data.
+
+Typical choices of $K$ are 10 or $m$, which are known as 10-fold cross-validation and \textit{leave-one-out} cross-validation~\cite{Hastie2009}. \textit{Leave-one-out} is usually performed on small datasets.
+
+
+\section{Gradients of statistics with polynomial chaos}
+\label{sec:GradientStatistics0}
+Let $R(\bxi, \bx)$ be a function of interest that depends on uncertain variables $\bxi$ and also on design variables $\bx$. We assume independence between the design and uncertain variables\footnote{For most applications, the design and uncertain variables are independent. For instance, the design variables are the wind turbines location and the uncertain variables are the wind conditions.}. Now the polynomial chaos expansion---over the uncertain variables---becomes
+\begin{equation}
+  R(\bxi,\bx) \approx \hat{R}(\bxi,\bx) = \sum_{\bi\in \mathcal{I}_p} \alpha_\bi(\bx) \bPhi_\bi(\bxi).
+\end{equation}
+This expansion is only valid for a particular design vector---the coefficients $\alpha_\bi(\bx)$ are a function of the design variables. Therefore, the statistics are also a function of the design variables. Specifically the mean and the variance are
+\begin{equation}
+	\mu_R(\bx) = \alpha_\mathbf{0}(\bx),
+    \label{eq:meanDesign}
+\end{equation}
+and
+\begin{equation}
+  \sigma_R^2(\bx) = \sum_{\bi\in \mathcal{I}_p\setminus \mathbf{0}}
+  \alpha_{\bi}^2(\bx) \braket{\bPhi_\bi^2(\bxi)}.
+  \label{eq:varDesign}
+\end{equation}
+\subsection{Gradients of the statistics with polynomial chaos}
+\label{sec:GradientsStatistics}
+We want to know the gradients of the statistics with respect to the design variables, and we proceed to derive them below. For simplicity, we drop the subscript from the statistics $\mu_R = \mu$, the explicit variable dependence $R(\bxi,\bx)=R$, the bolded notation, and we use the following notation for the gradient $\frac{df}{dx} \equiv \nabla f$.
+
+The gradient of the mean from \cref{eq:meanDesign} is
+\begin{equation}
+  \frac{d\mu}{dx} = \frac{d\alpha_\mathbf{0}}{dx},
+  \label{eq:meanGradient}
+\end{equation}
+and the gradient of the variance from \cref{eq:varDesign} is
+\begin{equation}
+  \frac{d\sigma^2}{dx} = \sum_{\bi\in \mathcal{I}_p\setminus \mathbf{0}} {\braket{\bPhi_\bi^2}} \frac{d\alpha_\bi^2}{dx}
+  = 2 \sum_{\bi\in \mathcal{I}_p\setminus \mathbf{0}} {\braket{\bPhi_\bi^2}} \alpha_\bi \frac{d\alpha_\bi}{dx}.
+  \label{eq:varGradient}
+\end{equation}
+From which the gradient for the standard deviation can be computed as follows
+\begin{equation}
+  \frac{d\sigma}{dx} = \frac{1}{2\sigma}\frac{d\sigma^2}{dx}.
+\end{equation}
+Both, the mean and the variance gradients, depend on the gradient of the coefficients $\frac{d\alpha_\bi}{dx}$. This gradient can be computed with quadrature or regression as shown below.
+
+\subsection{Gradients of the coefficients}
+\label{sec:GradientCoefficients}
+The gradient of the coefficients can also be computed with quadrature or regression, similarly to how the coefficients can be calculated with quadrature (\cref{sec:PCcoeffQuad}) or regression (\cref{sec:PCcoeffReg}).
+
+% \subsection{Quadrature}
+\textbf{Quadrature}.
+We start from the equation for the coefficients \cref{eq:coefficients}, repeated here omitting the explicit dependence on the variables
+\begin{equation}
+  \alpha_\bi = \frac{\braket{R,\Phi_\bi}}{\braket{\Phi_\bi^2}} =
+  \frac{1}{{\braket{\Phi_\bi^2}}}
+  \int_\Omega R \Phi_\bi \rho \, d\bxi,
+\end{equation}
+and take the gradient of the coefficients to obtain
+\begin{equation}
+  \frac{d\alpha_\bi}{dx} =
+  \frac{1}{{\braket{\Phi_\bi^2}}} \int_{\Omega}\frac{dR}{dx} \Phi_\bi \rho \, d\bxi
+  = \frac{\braket{\frac{dR}{dx},\Phi_\bi}}{\braket{\Phi_\bi^2}}.
+  \label{eq:gradCoeff}
+\end{equation}
+Replacing this equation into the gradient of the mean \cref{eq:meanGradient} we obtain
+\begin{equation}
+  \frac{d\mu}{dx} = \Braket{\frac{dR}{dx}}.
+  \label{eq:gradientMeanPCq}
+\end{equation}
+And replacing \cref{eq:gradCoeff} into the gradient of the variance \cref{eq:varGradient} we obtain
+\begin{equation}
+  \frac{d\sigma^2}{dx} = 2 \sum_{\bi\in \mathcal{I}_p\setminus \mathbf{0}} \alpha_\bi  \Braket{\frac{dR}{dx},\Phi_\bi}.
+\end{equation}
+
+To obtain the gradients of the statistics with respect to each design variable we need to evaluate the multi-dimensional integral containing $\frac{dR}{dx}$. The integral is evaluated with quadrature (\cref{sec:PCcoeffQuad}) and requires the computation of the gradient of the response at each of the tensor-quadrature or sparse grid sample points. Ideally, one would use adjoint methods~\cite{Giles2000} or algorithmic differentiation~\cite{Griewank2008} to compute the gradients, $\frac{dR}{dx}$, efficiently.
+
+% \subsection{Regression}
+\textbf{Regression}.
+We start from the linear system \cref{eq:linearsystem}, which we repeat here
+\begin{equation}
+  \bPhi \balpha = R.
+\end{equation}
+We take the gradient to obtain
+\begin{equation}
+  \frac{d\bPhi \balpha}{dx} = \frac{dR}{dx}
+\end{equation}
+\begin{equation}
+  \bPhi \frac{d\balpha}{dx} = \frac{dR}{dx}
+\end{equation}
+
+\begin{equation}
+  \begin{bmatrix}
+    \Phi_\mathbf{0}(\bxi_1) & \cdots & \Phi_\mathbf{n-1}(\bxi_1) \\
+    \vdots & \ddots & \vdots \\
+    \Phi_\mathbf{0}(\bxi_m)  &\cdots & \Phi_\mathbf{n-1}(\bxi_m)
+  \end{bmatrix}
+  \begin{bmatrix}
+    \frac{d\alpha_0}{dx_1} & \cdots & \frac{d\alpha_0}{dx_d}\\
+    \vdots & \ddots & \vdots \\
+    \frac{d\alpha_{n-1}}{dx_1} & \cdots & \frac{d\alpha_{n-1}}{dx_d}
+    \end{bmatrix}
+    =
+  \begin{bmatrix}
+    \frac{dR_1}{dx_1} & \cdots & \frac{dR_1}{dx_d} \\
+    \vdots & \ddots & \vdots \\
+    \frac{dR_m}{dx_1} & \cdots & \frac{dR_m}{dx_d}
+  \end{bmatrix}.
+\end{equation}
+To solve for the gradient of the coefficients, we solve the linear system one column at a time of the $ \frac{d\balpha}{dx} $ matrix with the corresponding column of the matrix of the gradients $ \frac{dR}{dx} $.
+The linear system for the multiple right hand sides can be solved with the methods described in \cref{sec:PCcoeffReg}. Ideally, one would use adjoint methods~\cite{Giles2000} or algorithmic differentiation~\cite{Griewank2008} to efficiently compute the gradients, $\frac{dR_i}{dx}$, at the sample points in the right hand side matrix.
+
+Again, the gradient of the mean in terms of the coefficients is
+\begin{equation}
+  \frac{d\mu}{dx} = \frac{d\alpha_\mathbf{0}}{dx}. \tag{\ref{eq:meanGradient} revisited}
+\end{equation}
+And the gradient of the variance is
+\begin{equation}
+  \frac{d\sigma^2}{dx} = \sum_{\bi\in \mathcal{I}_p\setminus \mathbf{0}} {\braket{\bPhi_\bi^2}} \frac{d\alpha_\bi^2}{dx}
+  = 2 \sum_{\bi\in \mathcal{I}_p\setminus \mathbf{0}} {\braket{\bPhi_\bi^2}} \alpha_\bi \frac{d\alpha_\bi}{dx}.
+  \tag{\ref{eq:varGradient} revisited}
+\end{equation}
+Thus, for the gradient of the mean take the first row of the $ \frac{d\balpha}{dx} $ matrix; and for the gradient of the variance use the gradient of the coefficients from all the other rows.
+
+%ssay something about the size of this problem, the number of design variables d. Solving for the gradient with regression kinda weird for underdetermined problems.
+
+\subsection{Gradients of the statistics by direct numerical integration}
+Similarly to computing the mean and variance with direct numerical integration (\cref{sec:directIntegration}), we can also compute the gradients of the mean and variance directly with numerical integration starting from the definitions of the mean, \cref{eq:meanDef}, and taking the gradient
+\begin{equation}
+  \frac{d\mu}{dx} = \frac{d}{dx} \int_{\Omega}R\rho \,d\xi =  \int_{\Omega}\frac{dR}{dx}\rho \, d\xi = \Braket{\frac{dR}{dx}},
+  \label{eq:gradientMeanDirect}
+\end{equation}
+and starting from the definition of the variance, \cref{eq:varDef}, and taking the gradient
+\begin{align}
+  \frac{d\sigma^2}{dx} & = \frac{d}{dx} \int_{\Omega}R^2\rho \,d\xi - \frac{d}{dx} \mu^2 \\
+  & = 2 \int_{\Omega} R \frac{dR}{dx}\rho \,d\xi - 2 \mu \frac{d\mu}{dx} \\
+  & = 2 \Braket{R, \frac{dR}{dx}} - 2\mu\Braket{\frac{dR}{dx}}.
+\end{align}
+The multi-dimensional integrals---$\Braket{R, \frac{dR}{dx}}$ and $\Braket{\frac{dR}{dx}}$---are calculated with the methods described in \cref{sec:PCcoeffQuad} or also by the rectangle rule \cref{sec:directIntegration}. The equation for the gradient of the mean is the same when computing it with polynomial chaos based on quadrature, \cref{eq:gradientMeanPCq}, or by directly differentiating the definition, \cref{eq:gradientMeanDirect}, what varies is the quadrature method used. This is similar to what we observed for the mean (the zeroth coefficient) in \cref{sec:PCcoeffQuad}.
+
+% and require the computation of the gradient $\frac{dR}{dx}$ of the response at each of the quadrature points. Ideally, one would use adjoint methods~\cite{Giles2000} or algorithmic differentiation~\cite{Griewank2008} to compute the gradients, $\frac{dR}{dx}$, efficiently.
+
+%Note that the formulas (both mean gradient formulas) for computing the gradient of the mean are equivalent when the coefficients are computed by quadrature. No such equivalence is the case for the variance (I need to double check this). For simplicity we use the polynomial chaos coefficients gradients. (See if I can give a reason for this) (I can use this other formula for checking the results.)
+
+% \section{Hessians with polynomial chaos}
+% The derivative of the variance. I have partial notation now, maybe go forward with that.
+% \begin{equation}
+% 	\frac{\partial \sigma^2}{\partial x_j} = 2 \sum_{i=1}^p \alpha_i
+%     \Braket{\frac{\partial R}{\partial x_j}, \phi_i}
+% \end{equation}
+%
+% The simplified version of the Hessian
+% \begin{equation}
+% 	\frac{\partial^2 \sigma^2}{\partial x_j \partial x_k} = 2 \sum_{i=1}^p
+%     \left(\frac{\Braket{\frac{\partial R}{\partial x_j}, \phi_i}\Braket{\frac{\partial R}{\partial x_k}, \phi_i}}{\Braket{\phi_i^2}}
+%     + \alpha_i \Braket{\frac{\partial^2 R}{\partial x_j \partial x_k}, \phi_i}
+%     \right)
+% \end{equation}
+%
+
+
+\bibliographystyle{aiaa}
+\bibliography{journalpaper}
+
+\end{document}
