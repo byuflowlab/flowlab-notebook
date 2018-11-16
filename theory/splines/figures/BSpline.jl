@@ -1,3 +1,6 @@
+using Plots
+pyplot()
+
 """
     getspanindex(n, p, u, U)
 
@@ -302,3 +305,34 @@ function curvederivativecontrolpoints(n, p, U, P, d, r1, r2)
 end
 
 #There is another curvederivatives algorithm in the book (Algorithm 3.4)
+
+
+#Basic Basis
+t = range(0,stop=5,length=500)
+b1 = zeros(length(t))
+b2 = zeros(length(t))
+b3 = zeros(length(t))
+for i=1:length(t)
+    if t[i] < 1
+        b1[i] = 0.5*(t[i])^2
+    elseif t[i] >= 1 && t[i] < 2
+        b1[i] = 0.5*(-2*(t[i]-1)^2 + 2*(t[i]-1) + 1)
+        b2[i] = 0.5*(t[i]-1)^2
+    elseif t[i] >= 2 && t[i] < 3
+        b1[i] = 0.5*((t[i]-2)^2 - 2*(t[i]-2) + 1)
+        b2[i] = 0.5*(-2*(t[i]-2)^2 + 2*(t[i]-2) + 1)
+        b3[i] = 0.5*(t[i]-2)^2
+    elseif t[i] >= 3 && t[i] < 4
+        b2[i] = 0.5*((t[i]-3)^2 - 2*(t[i]-3) + 1)
+        b3[i] = 0.5*(-2*(t[i]-3)^2 + 2*(t[i]-3) + 1)
+    elseif t[i] >= 4 && t[i] < 5
+        b3[i] = 0.5*((t[i]-4)^2 - 2*(t[i]-4) + 1)
+    end
+end
+
+plot(t,b1,label="\$N_{0,p}\$", aspectratio=:equal, ylimit=[-0.1,1.5])
+plot!(t,b2,label="\$N_{1,p}\$")
+plot!(t,b3,label="\$N_{2,p}\$")
+plot!([2,2],[-0.1,0.85],linecolor=4,label="bounds of definition")
+plot!([3,3],[-0.1,0.85],linecolor=4,label="")
+savefig("bspbasissimple.pdf")
