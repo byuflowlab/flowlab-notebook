@@ -368,11 +368,47 @@ Combining our now regular integrals back with the already regular parts, remembe
 The integrals of which we compute with the standard 3rd order Gaussian-Legendre quadrature as explained above, giving us the result $\approx 3.69314718055994$, which matches the analytic solution to 14 decimal places.
 
 
+\section{Application to Weakly Singular Integrals}
+When considering Gauss-Legendre quadrature with respect to weakly singular integrals, we can use a generalization of Telles' method\cite{Telles1987A-self-adaptive} described by Johnston and Elliot.\cite{Johnston2001A-generalisatio} This method uses the same Gauss points calculated before, but applies transformation thatmaps the interval of integration onto itself, and requires the derivative of transformation at the singular point to be zero in order to smooth (refine) the integration near the singular point.  The transformation is as follows:
+
+\begin{equation}
+\xi = \gamma_q(t) = \xi_s + \delta(\xi_s,q)(t-t_s(\xi_s,q))^q
+\end{equation}
+
+where $t$ ranges from -1 to 1, $q$ is the order of the transformation (q must be an odd integer), and $\xi_s$ is the source point. The $\delta$ and $t_2$ terms are defined as
+
+\begin{equation}
+\delta(\xi_s,q) = 
+\begin{cases}
+2^{1-q} & \mathrm{if}~~\xi_s = \pm 1\\
+2^{-q}\left[ (1+\xi_s)^{1/q} + (1-\xi_s)^{1/q} \right]^q & \mathrm{otherwise}
+\end{cases}
+\end{equation}
+
+
+\begin{equation}
+t_s(\xi_s,q) = 
+\begin{cases}
+\pm 1 & \mathrm{if}~~\xi_s = \pm 1\\
+\frac{ (1+\xi_s)^{1/q} - (1-\xi_s)^{1/q} }{ (1+\xi_s)^{1/q} + (1-\xi_s)^{1/q} } & \mathrm{otherwise}
+\end{cases}
+\end{equation}
+
+The first derivative of the transformation is
+
+\begin{equation}
+\gamma_q'(t) = q\delta(\xi_s,q)(t-t_s(\xi_s,q))^{q-1}
+\end{equation}
+
+and is used in computing the Jacobian of transformation in the integration.
 
 
 
- \bibliographystyle{aiaa} 
- \bibliography{quadrature.bib}{}
+
+\bigskip
+
+\bibliographystyle{aiaa} 
+\bibliography{quadrature.bib}{}
 
  
 \end{document}
