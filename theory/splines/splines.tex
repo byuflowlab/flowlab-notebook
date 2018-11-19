@@ -18,7 +18,7 @@ Bézeir curve are parametric.  To understand this concept and begin building int
 
 \begin{equation}
 \label{eq:parametricrelation}
-P(u) = (1-u)P_0 + uP_1
+P(t) = (1-u)P_0 + uP_1
 \end{equation}
 
 where $u$ is a parameter such that $0 \leq u \leq 1$, and $P_{(\cdot)}$ are 2D control points (note that they are 2D in this example, but are not, in general, limited to 2 dimensions). Notice that when $u=0$ we are at point $P_0$ and when $u=1$ we are at point $P_1$. 
@@ -33,15 +33,15 @@ where $u$ is a parameter such that $0 \leq u \leq 1$, and $P_{(\cdot)}$ are 2D c
 Next, let's define some parametric points $Q_{(\cdot)}$ as:
 
 \begin{align}
-Q_0 &=  (1-t)P_0 + tP_1 \\
-Q_1 &=  (1-t)P_1 + tP_2
+Q_0(u) &=  (1-u)P_0 + uP_1 \\
+Q_1(u) &=  (1-u)P_1 + uP_2
  \end{align} 
  
 Taking the points $Q_{(\cdot)}$ and applying the same equation \ref{eq:parametricrelation}, we can recursively create another parametric curve. Several examples are shown in figure \ref{fig:para2} as we proceed through the range of $u$. If we apply equation \ref{eq:parametricrelation} once more, the connected points create the quadratic curve, $C(t)$
 
 \begin{align}
-C(t) &= (1-t)Q_0 + tQ_1 \\
-&= (1-t)^2P_0 + 2t(1-t)P_1+t^2P_2 
+C(t) &= (1-u)Q_0 + uQ_1 \\
+&= (1-u)^2P_0 + 2u(1-u)P_1+u^2P_2 
 \end{align} 
 
 as shown in figure \ref{fig:para3}. This recursive application of parametric polynomials defines Bézier curves.
@@ -65,7 +65,7 @@ as shown in figure \ref{fig:para3}. This recursive application of parametric pol
 \subsection{Bernstein Polynomials}
 Before giving a more concise, more easily implemented defintion for Bézier Curves, let us take a minute to undertand Bernstein polynomials; which are defined as
 
-\begin{equation} B_{i,n}(u) = {n\choose i} u^i (1-u)^{n-i} ~~~~~0\leq u \leq1 \end{equation}
+\begin{equation} B_{i,n}(t) = {n\choose i} t^i (1-t)^{n-i} ~~~~~0\leq u \leq1 \end{equation}
 
 where \begin{equation} {n\choose i} = \frac{n!}{i!(n-i)!} \end{equation} 
 
