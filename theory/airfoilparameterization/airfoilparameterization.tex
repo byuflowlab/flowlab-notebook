@@ -1,0 +1,323 @@
+\input{../preamble}
+
+
+\begin{document}
+	
+	\chapter{Airfoil Parameterizations}
+	\chapterauthor{Judd Mehr, }
+	\label{ch:airfoilparams}
+	
+
+\section{NACA}
+\subsection{NACA 4-Series}
+The NACA parameterization method was developed by aerodynamicists at the NACA (National Advisory Committee for Aerodynamics) in the 1930s. \cite{Jacobs1933} The implementation is straightforward as follows.
+
+The 4 digit NACA series involves three parameters: The first digit represents maximum camber, $m$, given in percent chord.  The second digit is the position of maximum camber along the chord, $p$, given in tenths of chord. The final two digits together signify the thickness ratio, $t$, given in percent chord.  By way of example, a NACA 2412 would have 2\% maximum camber at 40\% chord, with a thickness ratio of 12\%. For symmetric airfoils, the first to digits are zero, as with the NACA 0012.  If an airfoil has a thickness ratio less than ten, the single digit percentage is preceded by a zero, such as the NACA 6409.  Because this method is so well known, we will refrain from displaying the mathematical definitions here.
+The airfoils corresponding to these three examples are shown in figure \ref{fig:nacas}.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=.6\textwidth]{naca.pdf}
+	\end{center}
+	\caption{NACA 0012, 2412, and 6409 airfoil shapes. Demonstrating the effects of altering NACA parameters}
+	\label{fig:nacas}
+\end{figure}
+
+These parameters are input into the following functions of the chordwise position, $x$ in order to find the z-coordinates of the unit airfoil curve.
+
+\begin{equation}
+z_t(x) = 5t\left( 0.2969 x^{\nicefrac{1}{2}} - 0.1260 x - 0.3516x^2 +0.2843 x^3 - 0.1015 x^4  \right)
+\end{equation}
+
+where $z_t$ is the equation of the airfoil thickness as a function of $x$.
+
+\begin{equation}
+z_c(x) = 
+\begin{cases} 
+\frac{2m}{p} (p-x) & 0 \leq x\leq p \\
+\frac{2m}{(1-p)^2} (p-x)  & p\leq x\leq 1
+\end{cases}
+\end{equation}
+
+where $z_c$ is a function of $x$ for the z-coordinate of the mean camber line.
+
+In theory, the thickness is applied perpendicular relative to the mean camber line, but in general practice the difference is so slight that most implementations (as well as ours) apply the thickness only vertically from the camber line as follows:
+
+\begin{equation}
+\begin{cases}
+z_u = z_c + z_t\\
+z_\ell = z_c - z_t
+\end{cases}
+\end{equation}
+
+where $z_u$ and $z_\ell$ are the upper and lower surface z-coordinates respectively.
+
+\subsection{NACA 5-Series}
+
+\section{Parametric Section (PARSEC)}
+
+The PARSEC method introduced by Sobieczky \cite{Sobieczky1999} involves intuitive parameters shown in figure \ref{fig:parsec} which are used to find coefficients for the function:  
+
+\begin{equation}
+z = \sum_{i=1}^6 a_i x^{i-1/2}
+\end{equation}
+
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=.6\textwidth]{parsecparams.png}
+	\end{center}
+	\caption{The PARSEC Parameters as described by Sobieczky. \cite{Sobieczky1999}}
+	\label{fig:parsec}
+\end{figure}
+
+The derivation of the coordinate definition based on the parameters shown in figure \ref{fig:parsec} is as follows: By inserting know elements of the airfoil geometry, and differentiating, the $a_i$ coefficients of the PARSEC model can be calculated.  Beginning at the leading edge and moving backward, and assuming a unit airfoil we start at $x_{LE}$ demonstrating the 6 parameter-coefficient relationships for the upper surface. Our first parameter of interest is the leading edge radius, $R_{LE}$. The general equation for a radius of curvature (assuming a twice differentiable curve) is
+
+\begin{equation} 
+\label{eqn:LErad}
+R = \left| \frac{\left[1+\left(\frac{dz}{dx}\right)^2\right]^{3/2}}{\frac{d^2z}{dx^2}}\right| 
+\end{equation}
+
+The first derivative of the PARSEC polynomial is
+
+\begin{equation} \frac{dz}{dx} = \sum_{i=1}^6 a_{i} \left(i-\frac{1}{2}\right) x^{i-3/2} \end{equation}
+
+and the second
+
+\begin{equation} \frac{d^2z}{dx^2} = \sum_{i=1}^6 a_{i} \left(i-\frac{1}{2}\right)\left(i-\frac{3}{2}\right) x^{i-5/2}  \end{equation}
+
+plugging these into the radius of curvature equation
+
+\begin{equation} 
+R= \left| \frac{\left( 1+ \left(\left(i-\frac{1}{2}\right)a_i x^{i-1/2}\right)^2\right)^{3/2}}{\left(i-\frac{1}{2}\right) \left(i-\frac{3}{2}\right) a_i x^{i-3/2}} \right| 
+\end{equation}
+
+Because the leading edge radius only depends on the coefficient $a_1$ we can replace $i$ in the equation with \ref{eqn:LErad}.  We also use $x_{LE}$ as it is the leading edge only where the leading edge radius is defined.
+
+\begin{equation} R_{LE_{up}}= \left| \frac{\left( 1+ \left(\left(1-\frac{1}{2}\right)a_{1_{up}} x_{LE}^{1-1/2}\right)^2\right)^{3/2}}{\left(1-\frac{1}{2}\right) \left(1-\frac{3}{2}\right) a_{1_{up}} x_{LE}^{1-3/2}} \right| \end{equation}
+
+Simplifying:
+
+\begin{equation} R_{LE_{up}}= \left| -\frac{x_{LE}^{3/2} \left(\frac{a_{1_{up}}^2 + 4 x_{LE}}{x_{LE}}\right)^{3/2}}{2 a_{1_{up}}} \right|  \end{equation}
+
+Canceling the $x_{LE}^{3/2}$ to avoid dividing by zero (remembering that $x_{LE} = 0$)
+
+\begin{equation}  R_{LE_{up}}= \left| -\frac{\left(a_{1_{up}}^2 + 4 x_{LE}\right)^{3/2}}{2 a_{1_{up}}} \right|  \end{equation}
+
+Now inputting zero for $x_{LE}$
+
+\begin{equation} R_{LE_{up}}= \left| -\frac{\left(a_{1_{up}}^2\right)^{3/2}}{2 a_{1_{up}}} \right|  \end{equation}
+
+and simplifying down to our first relation:
+
+\begin{equation} R_{LE_{up}}= \left| -\frac{a_{1_{up}}^2}{2} \right|  \end{equation}
+
+Traveling along the upper surface of the airfoil, we find ourselves at the point of maximum thickness, defined at $(x_u,~z_u)$. (Take note that $x_u$ and $z_u$ are the parameters define above, not the x-z values of the entire upper surface curve.) Plugging that point into the PARSEC polynomial results in our second relation:
+
+\begin{equation} z_u = \sum_{i=1}^6 a_{i_{up}} x_u^{i-1/2} \end{equation}
+
+At that same point, we note that the curvature there is another of our PARSEC parameters, $\frac{d^2z_{up}}{dx^2}$ or as named above: $z_{xx_u}$. Before we address the curvature relation, we notice along the way that we have an equation from the first derivative derived above, which we know equates to zero at the maximum, giving us our third relation:
+
+\begin{equation} \frac{dz_{up}}{dx} \biggr\rvert_{x=x_u} = 0 = \sum_{i=1}^6 a_{i_{up}} \left(i-\frac{1}{2}\right) x^{i-3/2}  \end{equation}
+
+where $z_{up}$ are the z-coordinates of the upper curve. Continuing on to revisit the second derivative, evaluating at the the point of maximum thickness yields our fourth relation:
+
+\begin{equation} z_{xx_u} = \sum_{i=1}^6 a_{i_{up}} \left(i-\frac{1}{2}\right)\left(i-\frac{3}{2}\right) x_u^{i-5/2}\end{equation}
+
+As we continue along the upper surface, we arrive at the trailing edge, where our parameters define an angle ($\theta_{TE}$) and a position ($z_{TE}$). Revisiting the first derivative of our curve, we see that
+
+\begin{equation} \frac{dz_{up}}{dx} \biggr\rvert_{x=x_{TE_{up}}} = \tan\theta_{TE_{up}} \end{equation}
+
+Taking the derivative of the PARSEC polynomial at $x_{TE} = 1$, we find our fifth relation to be:
+
+\begin{equation}  \tan\theta_{TE_{u}} = \sum_{i=1}^6 a_{i_{up}} \left(i-\frac{1}{2}\right) \end{equation}
+
+Looking last at the trailing edge position, we input $x_{TE} = 1$ into the original PARSEC polynomial and arrive at our sixth and final relation:
+
+\begin{equation} z_{TE_{u}} = \sum_{i=1}^6 a_{i_{up}}\end{equation}
+
+We represent the above relations for the upper surface in matrix form for simple computation.
+
+\begin{equation} 
+\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+x_u^{1/2} & x_u^{3/2} & x_u^{5/2} & x_u^{7/2} & x_u^{9/2} & x_u^{11/2} \\
+\frac{1}{2}x^{-1/2} & \frac{3}{2}x^{1/2} & \frac{5}{2}x^{3/2} & \frac{7}{2}x^{5/2} & \frac{9}{2}x^{7/2} & \frac{11}{2}x^{9/2} \\
+-\frac{1}{4}x^{-3/2} & \frac{3}{4}x^{-1/2} & \frac{15}{4}x^{1/2} & \frac{35}{4}x^{3/2} & \frac{63}{4}x^{5/2} & \frac{99}{4}x^{7/2} \\
+1/2 & 3/2 & 5/2 & 7/2 & 9/2 & 11/2 \\
+1 & 1 & 1 & 1 & 1 & 1 
+\end{bmatrix}
+\begin{bmatrix}
+a_{1} \\
+a_{2} \\
+a_{3} \\
+a_{4} \\
+a_{5} \\
+a_{6}     
+\end{bmatrix}
+=
+\begin{bmatrix}
+\sqrt{2 R_{LE}} \\
+z_u \\
+0 \\
+z_{xx_u} \\
+tan\left(\theta_{TE_u}\right) \\
+z_{TE_u}    
+\end{bmatrix}
+\end{equation}
+
+The same relations apply to the lower surface, and the same matrix form can be used, except that the subscripts are changed from $u$ to $l$ to indicate the parameters relating to the lower surfaces. The $\sqrt{2 R_{LE}}$ is also negated for the lower surface.
+
+\section{Class Shape Transformation (CST)}
+
+At the heart of the CST parameterization, described by Kulfan and Bussoletti. \cite{Kulfan2006} is the generalized class function:
+
+\begin{equation}
+C\left(\nicefrac{x}{c}\right) = \left( \frac{x}{c} \right)^{N1} \left( 1-\frac{x}{c} \right)^{N2} 
+\end{equation}
+
+For a unit airfoil (used in the remainder of the derivation) with a round leading edge and a sharp trailing edge, c = 1, N1 = 0.5, and N2 = 1.0 (see figure \ref{fig:classfunction}).
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=.3\textwidth]{classfunction.pdf}
+	\end{center}
+	\caption{Plot of the generalized class function, $C(x)$ for a unit chord, demonstrating the basic airfoil shape created with N1 = 0.5 and N2 = 1.0.}
+	\label{fig:classfunction}
+\end{figure}
+
+The class function is modified to obtain an arbitrary airfoil shape by multiplying the function by a Bernstein polynomial of order n:
+
+\begin{equation}
+B = \sum_{r=0}^n S_{r,n}(x)
+\end{equation}
+
+where
+
+\begin{equation}
+S_{r,n}(x) = K_{r,n} x^r (1-x)^{n-r}
+\end{equation}
+
+and 
+
+\begin{equation}
+K_{r,n} \equiv \left( \begin{matrix} n\\r	\end{matrix} \right) \equiv \frac{n!}{r!(n-r)!}
+\end{equation}
+
+To get the specific airfoil shape, S is modified by coefficients: $A_u$ and $A_\ell$ which modify the upper and lower surfaces respectively.
+
+\begin{equation}
+S_{u}(x) = \sum_{i=1}^n A_{u_i} S_i(x)~~~~~~~
+S_{\ell}(x) = \sum_{i=1}^n A_{\ell_i} S_i(x)
+\end{equation}
+
+Bringing it all together, we add an additional term, $\Delta t$ as an optional input to shift the curves if a blunt, rather than sharp, trailing edge is desired. %Figure \ref{fig:6043} shows an airfoil created through the CST parameterization.
+\begin{equation}
+z_u(x) = C(x) S_{u}(x) + x \Delta t_u ~~~~~~~ z_\ell(x) = C(x) S_{\ell}(x) + x \Delta t_\ell
+\end{equation}
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=.6\textwidth]{sg6043.pdf}
+	\end{center}
+	\caption{Plot of airfoil using CST parameterization with upper surface coefficients: Au = [0.2099660; 0.281403; 0.275871; 0.383838] and lower surface coefficients: Al = [-0.0911718; 0.069681; -0.033338; 0.203912] which closely approximate the SG6043 airfoil.}
+	\label{fig:6043}
+\end{figure}
+
+
+\section{General B-Spline (GBS)}
+
+\section{Conformal Mappings}
+
+\subsection{Joukowski Transformation}
+The Joukowski Airfoil transformation first assumes a cylinder with its center at the origin described by
+
+\begin{equation}
+\label{eqn:complexcircle}
+	c = R e^{i\theta}
+\end{equation}
+
+where $c$ is the curve in the shape of the cylinder such that the real part of $c$ is the x component of the curve, and the imaginary part of $c$ is the y component; $R$ is the radius; and $\theta$ is defined as $0 \leq \theta \leq 2\pi$
+
+The Joukowski transformation is
+
+\begin{equation}
+\label{eqn:jouktrans}
+	\zeta_J(c) = c + \frac{1}{c}
+\end{equation}
+
+which transforms the cylinder into an ellipse with major axis $R + 1/R$ and minor axis $R - 1/R$. Of course if the radius is set to one, the minor axis dissapears and the result is a flat plate with major axis equal to two.
+
+If we shift the circle away from the origin, we alter the formula for the cylinder as follows:
+
+\begin{equation}
+\label{eqn:complexfoil}
+	c = 1+R \left(e^{i \theta}-e^{-i\beta} \right)
+\end{equation}
+
+where $R$ is the radius defined by
+
+\begin{equation}
+\label{eqn:radius}
+	R = \sqrt{(1-\mu_x)^2 + \mu_y}
+\end{equation}
+
+and $\mu_x$ and $\mu_y$ are the real and imaginary components of the center point, respectively.  $\beta$ is defined as the angle from the positve real axis intercept of the cylinder to the center of the cylinder.
+
+\begin{equation}
+	\beta = \sin^{-1}\frac{\mu_y}{R}
+\end{equation}
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[t]{0.475\textwidth} % width of left subfigure
+		\centering
+		\includegraphics[width=\textwidth]{joukcylinder.pdf}
+		\caption{Cylinders with centers at [-0.3,0.35i], [-0.2,0.3i], [0.1,0.25i]}
+		\label{fig:joukcyl}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.475\textwidth} % width of right subfigure
+		\centering
+		\includegraphics[width=\textwidth]{joukellipse.pdf}
+		\caption{Ellipses resulting from Joukowski transformation based on radii of cylinders in \ref{fig:joukcyl}.}
+		\label{fig:joukellipse}
+	\end{subfigure}
+	
+	\begin{subfigure}[b]{0.475\textwidth} % width of left subfigure
+		\centering
+		\includegraphics[width=\textwidth]{jouksym.pdf}
+		\caption{Symmetric airfoils from real compenent of cylinder centers.}
+		\label{fig:jouksym}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.475\textwidth} % width of right subfigure
+		\centering
+		\includegraphics[width=\textwidth]{joukairfoil1.pdf}
+		\caption{Final cambered airfoils from the cylinders shown in \ref{fig:joukcyl}.}
+		\label{fig:joukaf1}
+	\end{subfigure}
+	\caption{The progression of conformal mapping from cylinder to cambered airfoil. First a center point is chosen and a radius is computed using equation \ref{eqn:radius}, resulting in the cylinder shown in \ref{fig:joukcyl}. For a given radius, a cylinder centered at [0,0] can be mapped to an ellipse using equations \ref{eqn:complexcircle} and \ref{eqn:jouktrans} as seen in \ref{fig:joukellipse}. As the center point of the cylinder is moved, equation \ref{eqn:complexfoil} is used instead of \ref{eqn:complexcircle} which creates an airfoil as seen in \ref{fig:jouksym}. Finally, as the center point of the cylinder moves along the real axis, the thickness of a symmetric airfoil is changed, and as the center point of the cylinder moves away from the real axis, the resulting airfoil is given an associated camber as shown in \ref{fig:joukaf1}.} % caption for whole figure
+\end{figure}
+
+By shifting the cylinder's center along the real axis, we alter the cylinder radius. This in turn alters the airfoil thickness. By shifting the center along the imaginary axis, we change the angle $\beta$, which leads to changes in the camber of the airfoil.  If the center stays on the real axis, a symmetric airfoil is produced.
+
+\subsection{Karman-Trefftz Transformation}
+The Karman-Trefftz airfoil transformation is a generalized form of the Joukowski transformation, allowing for non-zero wedge angles.  Although if a wedge angle of zero is chose, a Joukowski airfoil is created.  The Karman-Trefftz transformation is of the form:
+
+\begin{equation}
+\zeta_{KT}(c) = \lambda \frac{\left(1+\frac{1}{c}\right)^\lambda + \left(1-\frac{1}{c}\right)^\lambda}{\left(1+\frac{1}{c}\right)^\lambda - \left(1-\frac{1}{c}\right)^\lambda}
+\end{equation}
+
+where \[\lambda = 2 - \frac{\gamma}{\pi}\]
+
+and $\gamma$ is the wedge angle in radians.\cite{Blom1983}
+
+
+\bigskip
+
+\bibliographystyle{aiaa} 
+\bibliography{airfoilparameterization.bib}{}
+
+
+\end{document}
