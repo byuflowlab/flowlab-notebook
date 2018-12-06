@@ -1,5 +1,5 @@
 using Plots
-pyplot()
+# pyplot()
 
 """
     binomialcoeff(n, i)
@@ -84,20 +84,19 @@ end
 # ---- PLOTS FOR THEORY ----- #
 u = collect(range(0,stop=1,length=50))
 
-# b04 = bernsteincoeff(u, 4, 0)
-# b14 = bernsteincoeff(u, 4, 1)
-# b24 = bernsteincoeff(u, 4, 2)
-# b34 = bernsteincoeff(u, 4, 3)
-# b44 = bernsteincoeff(u, 4, 4)
+b04 = bernsteincoeff(u, 4, 0)
+b14 = bernsteincoeff(u, 4, 1)
+b24 = bernsteincoeff(u, 4, 2)
+b34 = bernsteincoeff(u, 4, 3)
+b44 = bernsteincoeff(u, 4, 4)
 
-
-# plot(legendfont=11,tickfont=11)
-# plot!(u,b04,label="\$B_{0,4}\$")
-# plot!(u,b14,label="\$B_{1,4}\$")
-# plot!(u,b24,label="\$B_{2,4}\$")
-# plot!(u,b34,label="\$B_{3,4}\$")
-# plot!(u,b44,label="\$B_{4,4}\$")
-# savefig("bernstein.pdf")
+plot(legendfont=11,tickfont=11,xlabel="u",ylabel="\$B_{i,n}(u)\$")
+plot!(u,b04,label="\$B_{0,4}\$")
+plot!(u,b14,label="\$B_{1,4}\$")
+plot!(u,b24,label="\$B_{2,4}\$")
+plot!(u,b34,label="\$B_{3,4}\$")
+plot!(u,b44,label="\$B_{4,4}\$")
+savefig("bernstein.pdf")
 
 #-- BUILDING PARAMETRIC CURVE:
 #define some points
