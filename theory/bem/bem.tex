@@ -1252,20 +1252,40 @@ TODO: replace with no curvature/sweep.  I don't feel like our methods are equipp
 
 The local airfoil coordinate system is shown in \cref{fig:csys}.  The z-direction is directed along the blade, the y-direction opposite to the rotational velocity, and the x-direction given by the right-hand rule (nominally in the downwind direction).  This coordinate system is equally valid for downwind turbines, but in both cases, assumes that the rotor is rotating clockwise when viewed from upwind.  Because the blade may be curved (whether due to a nonstraight design or deflection), the coordinate system is local to each section along the blade (\cref{fig:curved}).  Swept blades can also be handled, but it is assumed that sweep is accomplished through shearing, rather than rotation, so that the local airfoils and local coordinate systems are still defined relative to the unswept rotation direction (\cref{fig:swept}).
 
+%NOTE Judd changed this from subfig to caption/subcaption syntax since it's basically the same, but caption/subcaption is newer and works better in the airfoilparams 2x2 figure(s)
+%\begin{figure}[htbp]
+%\centering
+% \subfloat[Side view of curved blade.  Coordinate system is normal to curvature.]{
+%   \makebox[3.0in][c]{\includegraphics[height=2.5in]{curved}}
+%   \label{fig:curved}
+% }
+% \qquad
+% \subfloat[Front view of swept blade.  Sweep is accomplished through shearing, so coordinate system stays parallel to sweep of blade root.]{
+%   \makebox[3.0in][c]{\includegraphics[height=2.5in]{swept}}
+%   \label{fig:swept}
+% }
+% \caption{Definition of local airfoil coordinate system.}
+% \label{fig:csys}
+%\end{figure}
+
 \begin{figure}[htbp]
-\centering
- \subfloat[Side view of curved blade.  Coordinate system is normal to curvature.]{
-   \makebox[3.0in][c]{\includegraphics[height=2.5in]{curved}}
-   \label{fig:curved}
- }
- \qquad
- \subfloat[Front view of swept blade.  Sweep is accomplished through shearing, so coordinate system stays parallel to sweep of blade root.]{
-   \makebox[3.0in][c]{\includegraphics[height=2.5in]{swept}}
-   \label{fig:swept}
- }
- \caption{Definition of local airfoil coordinate system.}
- \label{fig:csys}
+	\centering
+	\begin{subfigure}[t]{3.0in} % width of left subfigure
+		\centering
+		\includegraphics[height=2.5in]{curved}
+		\caption{Side view of curved blade.  Coordinate system is normal to curvature.}
+		\label{fig:curved}
+	\end{subfigure}
+	\begin{subfigure}[t]{3.0in} % width of right subfigure
+		\centering
+		\includegraphics[height=2.5in]{swept}
+		\caption{Front view of swept blade.  Sweep is accomplished through shearing, so coordinate system stays parallel to sweep of blade root.}
+		\label{fig:swept}
+	\end{subfigure}
+	\caption{Definition of local airfoil coordinate system.}
+	\label{fig:csys}
 \end{figure}
+
 
 Using this coordinate system (which is consistent with those used earlier in the paper), the normal force per unit length ($N^\prime$) is in the +x direction, and the tangential force per unit length ($T^\prime$) is in the -y direction.  If we define the precone angle as $\Phi$ then the thrust can be found through integration as:
 % If we define the coning angle along the blade as $\Phi(s)$ (add figure) then the thrust can be found through integration as:
