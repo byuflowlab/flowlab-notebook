@@ -10,11 +10,11 @@
 \section{Introduction}
 \label{sec:splinesintro}
 
-Splines are useful in many applications. Splines began as physical, rather than mathematical objects. In the ship building, and later the aircraft building, industry, as well as other architectural applications, drafters would use thin pieces of wood or metal called splines that they would bend through key points to create smooth interpolative curves.  Today, splines are used much in the same way, albeit primarily in virtual applications.  In enginnering, splines are most often used for data interpolation and graphic design/representation (CAD). Simply put, splines are piecewise polynomial functions; thus they behave more or less as do polynomials, but have much greater flexibility and are therefore often preferred for accuracy in interpolation and flexibility in design. There are many kinds of splines, but here we discuss Béziers, B-Splines, and NURBS.
+Splines are useful in many applications including, but not limited to: Engineering, Architecture, Graphic Design, and Mathematics. Splines began as physical, rather than mathematical objects. In the ship building, and later the aircraft building, industry, as well as other architectural applications, drafters would use thin pieces of wood or metal called splines that they would bend through key points to create smooth interpolative curves.  Today, splines are used much in the same way, albeit primarily in virtual applications.  In engineering, splines are most often used for data interpolation and graphic design/representation (CAD). Simply put, splines are piecewise polynomial functions; thus they behave more or less as do polynomials, but have much greater flexibility and are therefore often preferred for accuracy in interpolation and flexibility in design. There are many kinds of splines, but here we discuss Bézier Curves, B-Splines, and NURBS.
 
 \section{Bézier Curves}
 \subsection{Understanding the Parametric Nature of Bézier Curves}
-Bézeir curve are parametric.  To understand this concept and begin building intuition behind spline structure, we will jump right in and create a basic quadratic Bézier curve. We start with the parametric function $P(u)$, defined as:
+Bézeir curves are parametric.  To understand this concept and begin building intuition behind general spline structure, we will jump right in and create a basic quadratic Bézier curve. We start with the parametric function $P(u)$, defined as:
 
 \begin{equation}
 \label{eq:parametricrelation}
@@ -44,7 +44,7 @@ C(t) &= (1-u)Q_0 + uQ_1 \\
 &= (1-u)^2P_0 + 2u(1-u)P_1+u^2P_2 
 \end{align} 
 
-as shown in figure \ref{fig:para3}. This recursive application of parametric polynomials defines Bézier curves.
+as shown in figure \ref{fig:para3}. This recursive application of parametric polynomials is how Bézier curves are defined.
  
  \begin{figure}[htbp]
  	\centering
@@ -65,7 +65,7 @@ as shown in figure \ref{fig:para3}. This recursive application of parametric pol
 \subsection{Bernstein Polynomials}
 Before giving a more concise, more easily implemented defintion for Bézier Curves, let us take a minute to undertand Bernstein polynomials; which are defined as
 
-\begin{equation} B_{i,n}(t) = {n\choose i} t^i (1-t)^{n-i} ~~~~~0\leq u \leq1 \end{equation}
+\begin{equation} B_{i,n}(u) = {n\choose i} u^i (1-u)^{n-i} ~~~~~0\leq u \leq1 \end{equation}
 
 where \begin{equation} {n\choose i} = \frac{n!}{i!(n-i)!} \end{equation} 
 
@@ -96,7 +96,7 @@ where $B_{i,n}(u)$ are the basis (sometimes called bledning or shape) functions.
 \section{Basis Splines (B-Splines)}
 
 \subsection{B-Spline Basis Functions}
-Let us first begin by defining a knot vector, $U = \{u_1, u_2  \ldots u_{m}\}$, where the knots $u_i$ are non-decreasing.  (The full importance of the knot vector will be clear later.) Using this knot vector we define $N_{i,p}(u)$, the $i$th basis function of degree $p$ (note that degree and order are not synonymous when speaking of splines; in general, order = $p+1$) using the Cox-deBoor algorithm:
+B-Spline construction revolves basis functions, and these basis functions are dependent on knots, or the junctions of the Bézier curves which make up the B-Spline. To define a B-Spline basis and later a B-Spline curve, we first begin by defining a knot vector, $U = \{u_1, u_2  \ldots u_{m}\}$, where the knots $u_i$ are non-decreasing.  (The full importance of the knot vector will be clear later.) Using this knot vector we define $N_{i,p}(u)$, the $i$th basis function of degree $p$ (note that degree and order are not synonymous when speaking of splines; in general, order = $p+1$) using the Cox-deBoor algorithm:
 
 \begin{equation} 
 N_{i,0}(u) = 
@@ -146,11 +146,11 @@ a_{k,k} &= \frac{-a_{k-1,k-1}}{u_{i+p+1} - u_{i+k} }
 
 
 \subsection{B-Spline Definition}
-A B-Spline is a series of Bézier curves joined end to end.  The definition of a B-Spline is
+As mentioned, a B-Spline is a series of Bézier curves joined end to end with junctions called knots.  The definition of a B-Spline is
 
 \begin{equation} \textbf{C}(u) = \sum^n_{i=0}N_{i,p}(u) \textbf{P}_i~~~~~a\leq u \leq b \end{equation}
 
-and has derivative
+and has derivatives
 
 \begin{equation} \textbf{C}^{(k)}(u) = \sum^n_{i=0}N^{(k)}_{i,p}(u) \textbf{P}_i~~~~~a\leq u \leq b \end{equation}
 
@@ -158,7 +158,7 @@ where $\textbf{P}_i$ are control points and $N_{i,p}(u) $ are the basis function
  
 \begin{equation} U = \{\underbrace{a,\ldots,a}_{p+1},u_{p+1},\ldots,u_{m-p-1},\underbrace{b,\ldots,b}_{p+1} \}  \end{equation}
 
-
+%TODO add example of Bspline showing bases and how the knot vector affects them, as well as the associated curves.  p=2 and p=3 are probably sufficient.
 
 
 \section{Non-uniform Rational B-Splines (NURBS)}
@@ -179,6 +179,8 @@ and our expression becomes
 
 \begin{equation} \textbf{C}(u) = \sum^n_{i=0} R_{i,p}(u) \textbf{P}_i  \end{equation}  
 
+%TODO Add an example here showing the fitting of a quarter circle.
+
 \subsection{NURBS Derivatives}
 We can also express the definition of a NURBS curve as
 
@@ -197,12 +199,14 @@ and the $k$th derivative, $\textbf{C}^{ (k) }  (u)$, can be expressed as
 \subsection{Degree Elevation}
 Degree elevation, sometimes called p-refinement, is a process by which a p-degree spline is represented exactly in a higher order space.
 
+%TODO Show an example (the one in the docs is fine)
+
 \subsection{Knot Insertion}
 Knot insertion, sometimes called h-refinement, is a process by which extra knots are inserted into the knot vector, basically adding more Bézier curves to the spline where the knots are inserted, allowing for greater curve flexibility without increase the curve order.
 
+%TODO Show an example (the one in the docs is fine)
 
-
-\section{Tensor Product Surfaces}
+%\section{Tensor Product Surfaces}
 
 %
 % \bibliographystyle{aiaa} 
