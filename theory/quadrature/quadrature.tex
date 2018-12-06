@@ -38,8 +38,7 @@ Legendre polynomials have several attractive properties. Here I mention just a f
 
 \subsection{Gaussian Weights}
 
-Given a polynomial $p(x)$ of degree $2n-1$, we express $p$ in terms of a polynomial division
-.
+Given a polynomial $p(x)$ of degree $2n-1$, we express $p$ in terms of a polynomial division.
 \begin{equation} p(x) = q(x) L_n(x) + r(x) \end{equation}
 
 where $L_n(x)$ is the $n$th degree Legendre polynomial, and $q(x)$ is some polynomial of degree $\leq n-1$, and $r(x)$ is the remainder of the division of $q$ and $L$ and is also of degree $\leq n-1$.
@@ -369,7 +368,7 @@ The integrals of which we compute with the standard 3rd order Gaussian-Legendre 
 
 
 \section{Application to Weakly Singular Integrals}
-When considering Gauss-Legendre quadrature with respect to weakly singular integrals, we can use a generalization of Telles' method\cite{Telles1987A-self-adaptive} described by Johnston and Elliot.\cite{Johnston2001A-generalisatio} This method uses the same Gauss points calculated before, but applies transformation thatmaps the interval of integration onto itself, and requires the derivative of transformation at the singular point to be zero in order to smooth (refine) the integration near the singular point.  The transformation is as follows:
+When considering Gauss-Legendre quadrature with respect to weakly singular integrals, we can use a generalization of Telles' method\cite{Telles1987A-self-adaptive} described by Johnston and Elliot.\cite{Johnston2001A-generalisatio} This method uses the same Gauss points calculated before, but applies transformation that maps the interval of integration onto itself, and requires the derivative of transformation at the singular point to be zero in order to smooth (refine) the integration near the singular point.  The transformation is as follows:
 
 \begin{equation}
 \xi = \gamma_q(t) = \xi_s + \delta(\xi_s,q)(t-t_s(\xi_s,q))^q
