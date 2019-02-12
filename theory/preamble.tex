@@ -18,6 +18,7 @@
 \usepackage[usenames,dvipsnames]{xcolor} 
 \usepackage{algpseudocode}
 \usepackage{algorithm}
+\usepackage{appendix}
 
 \graphicspath{{figures/}}
 
@@ -76,4 +77,5 @@
 }
 
 % don't number sections
-\setcounter{secnumdepth}{-1}
+%\setcounter{secnumdepth}{-1}
+\renewcommand*\thesection{\arabic{section}}
