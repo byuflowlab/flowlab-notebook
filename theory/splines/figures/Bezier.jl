@@ -90,7 +90,7 @@ b24 = bernsteincoeff(u, 4, 2)
 b34 = bernsteincoeff(u, 4, 3)
 b44 = bernsteincoeff(u, 4, 4)
 
-plot(legendfont=11,tickfont=11,xlabel="u",ylabel="\$B_{i,n}(u)\$")
+plot(legendfont=11,tickfont=11,xlabel="t",ylabel="\$B_{i,n}(u)\$")
 plot!(u,b04,label="\$B_{0,4}\$")
 plot!(u,b14,label="\$B_{1,4}\$")
 plot!(u,b24,label="\$B_{2,4}\$")
@@ -117,20 +117,20 @@ x = [x0;x1]
 y = [y0;y1]
 
 #-- parameteric plot 1
-plot(x0,y0,xlabel="u",legend=false,aspectratio=:equal)
+plot(x0,y0,xlabel="t",legend=false,aspectratio=:equal)
 scatter!([0.0, 1.0], [0.0, 1.0])
 scatter!([-0.1, 0.9], [0.1, 1.1], markeralpha=0, markerstrokecolor=:transparent, series_annotations=[text("\$P_0\$",:left, 11), text("\$P_1\$",:left, 11)])
 savefig("para1.pdf")
 
 
 # -- parametric plot 2
-p1=plot(x,y,xlabel="u",legend=false,aspectratio=:equal,tickfont=11)
+p1=plot(x,y,xlabel="t",legend=false,aspectratio=:equal,tickfont=11)
 scatter!([0.0, 1.0, 2.0], [0.0, 1.0, 0.0])
 scatter!([-0.1, 1.0, 2.1], [0.1, 1.1, 0.1], markeralpha=0, markerstrokecolor=:transparent, series_annotations=[text("\$P_0\$",:left, 11), text("\$P_1\$", :left, 11), text("\$P_2\$",:left, 11)])
 
 Q0 = P(0.25,P0,P1)
 Q1 = P(0.25,P1,P2)
-p2 = plot(x,y,xlabel="u",legend=false,aspectratio=:equal,tickfont=11)
+p2 = plot(x,y,xlabel="t",legend=false,aspectratio=:equal,tickfont=11)
 scatter!([0.0, 1.0, 2.0], [0.0, 1.0, 0.0])
 scatter!([-0.1, 1.0, 2.1], [0.1, 1.1, 0.1], markeralpha=0, markerstrokecolor=:transparent, series_annotations=[text("\$P_0\$",:left, 11), text("\$P_1\$", :left, 11), text("\$P_2\$",:left, 11)])
 plot!([Q0[1], Q1[1]],[Q0[2], Q1[2]])
@@ -173,8 +173,8 @@ end
 
 xc, yc = C(u,P0,P1,P2)
 
-plot(x,y,xlabel="u",legend=false,aspectratio=:equal,tickfont=11)
-plot!(xc,yc,annotate=[(0.95,0.4,text("C(u)",11))])
+plot(x,y,xlabel="t",legend=false,aspectratio=:equal,tickfont=11)
+plot!(xc,yc,annotate=[(0.95,0.4,text("C(t)",11))])
 scatter!([0.0, 1.0, 2.0], [0.0, 1.0, 0.0])
 scatter!([-0.1, 1.0, 2.1], [0.1, 1.1, 0.1], markeralpha=0, markerstrokecolor=:transparent, series_annotations=[text("\$P_0\$",:left, 11), text("\$P_1\$", :left, 11), text("\$P_2\$",:left, 11)])
 savefig("para3.pdf")

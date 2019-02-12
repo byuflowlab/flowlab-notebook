@@ -1,8 +1,8 @@
 \input{../preamble}
-
+\usepackage{amsthm,amssymb}
 \begin{document}
 	
-\chapter{Splines}
+\chapter*{Splines}
 \chapterauthor{Judd Mehr}
 \label{ch:splines}
 
@@ -14,14 +14,14 @@ Splines are useful in many applications including, but not limited to: Engineeri
 
 \section{Bézier Curves}
 \subsection{Understanding the Parametric Nature of Bézier Curves}
-Bézeir curves are parametric.  To understand this concept and begin building intuition behind general spline structure, we will jump right in and create a basic quadratic Bézier curve. We start with the parametric function $P(u)$, defined as:
+Bézeir curves are parametric.  To understand this concept and begin building intuition behind general spline structure, we will jump right in and create a basic quadratic Bézier curve. We start with the parametric function $P(t)$, defined as:
 
 \begin{equation}
 \label{eq:parametricrelation}
-P(t) = (1-u)P_0 + uP_1
+P(t) = (1-t)P_0 + tP_1
 \end{equation}
 
-where $u$ is a parameter such that $0 \leq u \leq 1$, and $P_{(\cdot)}$ are 2D control points (note that they are 2D in this example, but are not, in general, limited to 2 dimensions). Notice that when $u=0$ we are at point $P_0$ and when $u=1$ we are at point $P_1$. 
+where $t$ is a parameter such that $0 \leq t \leq 1$, and $P_{(\cdot)}$ are 2D control points (note that they are 2D in this example, but are not, in general, limited to 2 dimensions). Notice that when $t=0$ we are at point $P_0$ and when $t=1$ we are at point $P_1$. 
 
 \begin{figure}[htbp]
 	\centering
@@ -33,18 +33,18 @@ where $u$ is a parameter such that $0 \leq u \leq 1$, and $P_{(\cdot)}$ are 2D c
 Next, let's define some parametric points $Q_{(\cdot)}$ as:
 
 \begin{align}
-Q_0(u) &=  (1-u)P_0 + uP_1 \\
-Q_1(u) &=  (1-u)P_1 + uP_2
+Q_0(t) &=  (1-t)P_0 + tP_1 \\
+Q_1(t) &=  (1-t)P_1 + tP_2
  \end{align} 
  
-Taking the points $Q_{(\cdot)}$ and applying the same equation \ref{eq:parametricrelation}, we can recursively create another parametric curve. Several examples are shown in figure \ref{fig:para2} as we proceed through the range of $u$. If we apply equation \ref{eq:parametricrelation} once more, the connected points create the quadratic curve, $C(t)$
+Taking the points $Q_{(\cdot)}$ and applying the same equation \cref{eq:parametricrelation}, we can recursively create another parametric curve. Several examples are shown in figure \cref{fig:para2} as we proceed through the range of $t$. If we apply equation \cref{eq:parametricrelation} once more, the connected points create the quadratic curve, $C(t)$
 
 \begin{align}
-C(t) &= (1-u)Q_0 + uQ_1 \\
-&= (1-u)^2P_0 + 2u(1-u)P_1+u^2P_2 
+C(t) &= (1-t)Q_0 + tQ_1 \\
+&= (1-t)^2P_0 + 2t(1-t)P_1+t^2P_2 
 \end{align} 
 
-as shown in figure \ref{fig:para3}. This recursive application of parametric polynomials is how Bézier curves are defined.
+as shown in figure \cref{fig:para3}. This recursive application of parametric polynomials is how Bézier curves are defined.
  
  \begin{figure}[htbp]
  	\centering
@@ -65,7 +65,7 @@ as shown in figure \ref{fig:para3}. This recursive application of parametric pol
 \subsection{Bernstein Polynomials}
 Before giving a more concise, more easily implemented defintion for Bézier Curves, let us take a minute to undertand Bernstein polynomials; which are defined as
 
-\begin{equation} B_{i,n}(u) = {n\choose i} u^i (1-u)^{n-i} ~~~~~0\leq u \leq1 \end{equation}
+\begin{equation} B_{i,n}(t) = {n\choose i} t^i (1-t)^{n-i} ~~~~~0\leq t \leq1 \end{equation}
 
 where \begin{equation} {n\choose i} = \frac{n!}{i!(n-i)!} \end{equation} 
 
@@ -76,87 +76,93 @@ where \begin{equation} {n\choose i} = \frac{n!}{i!(n-i)!} \end{equation}
 	\label{fig:bernstein}
 \end{figure}
 
-From figure \ref{fig:bernstein} we can see some important properties of Berstein polynomials. We won't state why they are important just yet, but it will be good to recognize them now.
+From figure \cref{fig:bernstein} we can see some important properties of Berstein polynomials. We won't state why they are important just yet, but it will be good to recognize them now.
 
 \begin{enumerate}
-	\item $B_{i,n}(u) > 0$ everywhere in the range of $u$.
-	\item $\sum_{i=0}^n B_{i,n}(u) = 1$ everywhere in the range of $u$.
-	\item $B_{i,n}(u)$ has only one maximum in the range of $u$, at $u=i/n$.
-	\item The set of  $B_{i,n}(u)$ are symmetric about $u=1/2$.
+	\item $B_{i,n}(t) > 0$ everywhere in the range of $t$.
+	\item $\sum_{i=0}^n B_{i,n}(t) = 1$ everywhere in the range of $t$.
+	\item $B_{i,n}(t)$ has only one maximum in the range of $t$, at $t=i/n$.
+	\item The set of  $B_{i,n}(t)$ are symmetric about $t=1/2$.
 \end{enumerate}
 
 \subsection{Bézier Curve Definition Based on Bernstein Polynomials}
 
 Bézier curves can be expressed as follows.
 
-\begin{equation} \textbf{C}(u) = \sum^n_{i=0}B_{i,n}(u) \textbf{P}_i~~~~~0\leq u \leq1 \end{equation}
+\begin{equation} \textbf{C}(t) = \sum^n_{i=0}B_{i,n}(t) \textbf{P}_i~~~~~0\leq t \leq1 \end{equation}
 
-where $B_{i,n}(u)$ are the basis (sometimes called bledning or shape) functions. For Bézier curves, these basis functions are indeed Bernstein polynomials. \(\textbf{P}_i\) are geometric control points.  This formulation (mathematically equivalent to polynomial power basis form derived in like manner to the example of a quadratic curve given above) for Bézier curves is attractive due to its well behaved nature in numerical applications. Furthermore, it tends to be relatively intuitive to work with.
+where $B_{i,n}(t)$ are the basis (sometimes called blending or shape) functions. For Bézier curves, these basis functions are indeed Bernstein polynomials. \(\textbf{P}_i\) are geometric control points.  This formulation (mathematically equivalent to polynomial power basis form derived in like manner to the example of a quadratic curve given above) for Bézier curves is attractive due to its well behaved nature in numerical applications. Furthermore, it tends to be relatively intuitive to work with.
 
 \section{Basis Splines (B-Splines)}
 
 \subsection{B-Spline Basis Functions}
-B-Spline construction revolves basis functions, and these basis functions are dependent on knots, or the junctions of the Bézier curves which make up the B-Spline. To define a B-Spline basis and later a B-Spline curve, we first begin by defining a knot vector, $U = \{u_1, u_2  \ldots u_{m}\}$, where the knots $u_i$ are non-decreasing.  (The full importance of the knot vector will be clear later.) Using this knot vector we define $N_{i,p}(u)$, the $i$th basis function of degree $p$ (note that degree and order are not synonymous when speaking of splines; in general, order = $p+1$) using the Cox-deBoor algorithm:
+B-Spline construction revolves basis functions, and these basis functions are dependent on knots, or the junctions of the Bézier curves which make up the B-Spline. To define a B-Spline basis and later a B-Spline curve, we first begin by defining a knot vector, $\mathcal{T} = \{t_1, t_2  \ldots t_{m}\}$, where the knots $t_i$ are non-decreasing.  (The full importance of the knot vector will be clear later.) Using this knot vector we define $N_{i,p}(t)$, the $i$th basis function of degree $p$ (note that degree and order are not synonymous when speaking of splines; in general, order = $p+1$) using the Cox-deBoor algorithm:
 
 \begin{equation} 
-N_{i,0}(u) = 
+\label{eqn:basis0}
+N_{i,0}(t) = 
 \begin{cases} 
-1 & \text{if  } u_i \leq u < u_{i+1} \\
+1 & \text{if  } t_i \leq t < t_{i+1} \\
 0 & \text{otherwise}
 \end{cases} 
 \end{equation}
 
-\begin{equation} N_{i,p}(u) = \frac{u-u_i}{u_{i+p}-u_i} N_{i,p-1}(u) + \frac{u_{i+p+1}-u}{u_{i+p+1}-u_{i+1}}N_{i+1,p-1}(u) \end{equation}
+\begin{equation}
+\label{eqn:basisgeneral} 
+N_{i,p}(t) = \frac{t-t_i}{t_{i+p}-t_i} N_{i,p-1}(t) + \frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}}N_{i+1,p-1}(t) \end{equation}
 
 \bigskip
 
 This algorithm can be visualized as a triangular scheme:
 \begin{equation}
 \begin{matrix}
-	N_{0,0}(u) & \rightarrow & N_{0,1}(u) & \cdots & N_{0,p-1}(u) & \rightarrow & N_{0,p}(u)\\ 
+	N_{0,0}(t) & \rightarrow & N_{0,1}(t) & \cdots & N_{0,p-1}(t) & \rightarrow & N_{0,p}(t)\\ 
 	& \nearrow &  &  &  & \nearrow & \\ 
-	N_{1,0}(u) & \rightarrow & N_{1,1}(u) & \cdots & N_{1,p-1}(u) &  & \\ 
+	N_{1,0}(t) & \rightarrow & N_{1,1}(t) & \cdots & N_{1,p-1}(t) &  & \\ 
 	\vdots &  & \vdots &  &  &  & \\ 
-	N_{n-1,0}(u) & \rightarrow & N_{n-1,1}(u) &  &  &  & \\ 
+	N_{n-1,0}(t) & \rightarrow & N_{n-1,1}(t) &  &  &  & \\ 
 	& \nearrow &  &  &  &  & \\ 
-	N_{n,0}(u) &  &  &  &  &  & \\ 
+	N_{n,0}(t) &  &  &  &  &  & \\ 
 \end{matrix}
 \end{equation}
 
-The derivative of a basis function, $N_{i,p}(u)$, is given by
+The derivative of a basis function, $N_{i,p}(t)$, is given by
 
-\begin{equation}N_{i,p}'(u) = \frac{p}{u_{i+p} - u_i} N_{i,p-1}(u) - \frac{p}{u_{i+p+1} - u_{i+1}} N_{i+1,p-1}(u)  \end{equation}
+\begin{equation}
+\label{eqn:basisderivative}
+N_{i,p}'(t) = \frac{p}{t_{i+p} - t_i} N_{i,p-1}(t) - \frac{p}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t)
+\end{equation}
 
-In general, the $k$th derivative is given by
+(See \cref{sec:basisderivativeproof} for the proof for this.) In general, the $k$th derivative is given by
 
-\begin{equation}N_{i,p}^{(k)}(u) = p \left( \frac{N_{i,p-1}^{(k-1)}(u)}{u_{i+p} - u_i} - \frac{N_{i+1,p-1}^{(k-1)}(u)}{u_{i+p+1} - u_{i+1}} \right) \end{equation}
+\begin{equation}N_{i,p}^{(k)}(t) = p \left( \frac{N_{i,p-1}^{(k-1)}(t)}{t_{i+p} - t_i} - \frac{N_{i+1,p-1}^{(k-1)}(t)}{t_{i+p+1} - t_{i+1}} \right) \end{equation}
 
-or in terms of $N_{i,p-k}(u), \ldots, N_{i+k,p-k}(u)$ rather than derivatives:
+or in terms of $N_{i,p-k}(t), \ldots, N_{i+k,p-k}(t)$ rather than derivatives:
 
-\begin{equation} N_{i,p}^{(k)}(u) = \frac{p!}{(p-k)!} \sum^k_{j=0} a_{k,j} N_{i+j,p-k}(u)  \end{equation}
+\begin{equation} N_{i,p}^{(k)}(t) = \frac{p!}{(p-k)!} \sum^k_{j=0} a_{k,j} N_{i+j,p-k}(t)  \end{equation}
 
 with
 
 \begin{align}
 a_{0,0} &= 1\\
-a_{k,0} &= \frac{a_{k-1,0}}{u_{i+p-k+1} - u_i}\\
-a_{k,j} &= \frac{a_{k-1,j} - a_{k-1,j-1}}{u_{i+p+j-k+1} - u_{i+j} } ~~~ j=1,\ldots,k-1\\
-a_{k,k} &= \frac{-a_{k-1,k-1}}{u_{i+p+1} - u_{i+k} }
+a_{k,0} &= \frac{a_{k-1,0}}{t_{i+p-k+1} - t_i}\\
+a_{k,j} &= \frac{a_{k-1,j} - a_{k-1,j-1}}{t_{i+p+j-k+1} - t_{i+j} } ~~~ j=1,\ldots,k-1\\
+a_{k,k} &= \frac{-a_{k-1,k-1}}{t_{i+p+1} - t_{i+k} }
 \end{align}
 
 
 \subsection{B-Spline Definition}
 As mentioned, a B-Spline is a series of Bézier curves joined end to end with junctions called knots.  The definition of a B-Spline is
 
-\begin{equation} \textbf{C}(u) = \sum^n_{i=0}N_{i,p}(u) \textbf{P}_i~~~~~a\leq u \leq b \end{equation}
+\begin{equation} \textbf{C}(t) = \sum^n_{i=0}N_{i,p}(t) \textbf{P}_i~~~~~a\leq t \leq b \end{equation}
 
 and has derivatives
 
-\begin{equation} \textbf{C}^{(k)}(u) = \sum^n_{i=0}N^{(k)}_{i,p}(u) \textbf{P}_i~~~~~a\leq u \leq b \end{equation}
+\begin{equation} \textbf{C}^{(k)}(t) = \sum^n_{i=0}N^{(k)}_{i,p}(t) \textbf{P}_i~~~~~a\leq t \leq b \end{equation}
 
-where $\textbf{P}_i$ are control points and $N_{i,p}(u) $ are the basis functions previously defined. A $p$th degree B-Spline has $n+1$ basis functions, where $n = m-p-1$, and the number of knots, $u_i$, in the knot vector, $U$, over which the spline is defined, is $m+1$ and the first and last knots are repeated $p+1$ times.
+where $\textbf{P}_i$ are control points and $N_{i,p}(t) $ are the basis functions previously defined. A $p$th degree B-Spline has $n+1$ basis functions, where $n = m-p-1$, and the number of knots, $t_i$, in the knot vector, $\mathcal{T}$, over which the spline is defined, is $m+1$ and the first and last knots are repeated $p+1$ times.
  
-\begin{equation} U = \{\underbrace{a,\ldots,a}_{p+1},u_{p+1},\ldots,u_{m-p-1},\underbrace{b,\ldots,b}_{p+1} \}  \end{equation}
+\begin{equation} \mathcal{T} = \{\underbrace{a,\ldots,a}_{p+1},t_{p+1},\ldots,t_{m-p-1},\underbrace{b,\ldots,b}_{p+1} \}  \end{equation}
 
 %TODO add example of Bspline showing bases and how the knot vector affects them, as well as the associated curves.  p=2 and p=3 are probably sufficient.
 
@@ -167,50 +173,145 @@ Now that we have a basic understanding of B-Splines, we can move on to NURBS, wh
 \subsection{NURBS Definition}
 NURBS can be thought of as weighted B-Splines, and are defined as follows:
 
-\begin{equation}\label{eqn:nurbsdef} \textbf{C}(u) = \frac{ \displaystyle \sum^n_{i=0}N_{i,p}(u) w_i \textbf{P}_i }{ \displaystyle \sum^n_{i=0}N_{i,p}(u) w_i }~~~~~a\leq u \leq b \end{equation}  
+\begin{equation}\label{eqn:nurbsdef} \textbf{C}(t) = \frac{ \displaystyle \sum^n_{i=0}N_{i,p}(t) w_i \textbf{P}_i }{ \displaystyle \sum^n_{i=0}N_{i,p}(t) w_i }~~~~~a\leq t \leq b \end{equation}  
 
-Where again $\textbf{P}_i$ are the control points, and $\{w_i\}$ are the weights and the knot vector, $U$ is defined as before except that the knots specifically need \textit{not} be uniform.
+Where again $\textbf{P}_i$ are the control points, and $\{w_i\}$ are the weights and the knot vector, $\mathcal{T}$ is defined as before except that the knots specifically need \textit{not} be uniform.
 
 To simplify this expression, we can define rational basis functions
 
-\begin{equation} R_{i,p}(u) = \frac{ N_{i,p}(u) w_i } { \displaystyle \sum^n_{i=0}N_{i,p}(u) w_i }\end{equation}  
+\begin{equation} R_{i,p}(t) = \frac{ N_{i,p}(t) w_i } { \displaystyle \sum^n_{i=0}N_{i,p}(t) w_i }\end{equation}  
 
 and our expression becomes
 
-\begin{equation} \textbf{C}(u) = \sum^n_{i=0} R_{i,p}(u) \textbf{P}_i  \end{equation}  
+\begin{equation} \textbf{C}(t) = \sum^n_{i=0} R_{i,p}(t) \textbf{P}_i  \end{equation}  
 
 %TODO Add an example here showing the fitting of a quarter circle.
 
 \subsection{NURBS Derivatives}
 We can also express the definition of a NURBS curve as
 
-\begin{equation} \textbf{C}(u) = \frac{ w(u) \textbf{C}(u) }{ w(u) } = \frac{ \textbf{A}(u) }{ w(u) }   \end{equation}  
+\begin{equation} \textbf{C}(t) = \frac{ w(t) \textbf{C}(t) }{ w(t) } = \frac{ \textbf{A}(t) }{ w(t) }   \end{equation}  
 
-where $\textbf{A}(u) $ is the numerator of equation \ref{eqn:nurbsdef}.
+where $\textbf{A}(t) $ is the numerator of equation \cref{eqn:nurbsdef}.
 
-The derivative, $\textbf{C}'(u)$, can then be expressed as
+The derivative, $\textbf{C}'(t)$, can then be expressed as
 
-\begin{equation} \textbf{C}'(u) = \frac{ \textbf{A}'(u) - w'(u) \textbf{C}(u) }{ w(u) }   \end{equation}
+\begin{equation} \textbf{C}'(t) = \frac{ \textbf{A}'(t) - w'(t) \textbf{C}(t) }{ w(t) }   \end{equation}
 
-and the $k$th derivative, $\textbf{C}^{ (k) }  (u)$, can be expressed as
+and the $k$th derivative, $\textbf{C}^{ (k) }  (t)$, can be expressed as
 
-\begin{equation} \textbf{C}^{(k)}(u) = \frac{ \textbf{A}^{(k)}(u) - \displaystyle \sum^k_{i=1} w^{(i)} (u) \textbf{C}^{(k-i)} (u) }{ w(u) }   \end{equation}
+\begin{equation} \textbf{C}^{(k)}(t) = \frac{ \textbf{A}^{(k)}(t) - \displaystyle \sum^k_{i=1} w^{(i)} (t) \textbf{C}^{(k-i)} (t) }{ w(t) }   \end{equation}
 
-\subsection{Degree Elevation}
+\subsection{Refinement}
+
+\subsubsection{Bézier Extraction}
+In order to understand the different kinds of spline refinement discussed below, we must first discuss Bézier extraction.
+
+
+\subsubsection{Degree Elevation}
 Degree elevation, sometimes called p-refinement, is a process by which a p-degree spline is represented exactly in a higher order space.
 
 %TODO Show an example (the one in the docs is fine)
 
-\subsection{Knot Insertion}
+\subsubsection{Knot Insertion}
 Knot insertion, sometimes called h-refinement, is a process by which extra knots are inserted into the knot vector, basically adding more Bézier curves to the spline where the knots are inserted, allowing for greater curve flexibility without increase the curve order.
 
 %TODO Show an example (the one in the docs is fine)
 
 %\section{Tensor Product Surfaces}
 
-%
-% \bibliographystyle{aiaa} 
-% \bibliography{splines.bib}{}
+\bibliographystyle{aiaa} 
+\bibliography{splines.bib}{}
 
- 
+
+\begin{appendices}
+\renewcommand{\thesection}{Appendix \Alph{section}.}
+
+\section{Proof by Induction for Basis Functions Derivatives}
+\label{sec:basisderivativeproof}
+The proof of \cref{eqn:basisderivative} comes from section 2.3 in reference \cite{Piegl1997The-NURBS-Book}. 
+
+\renewcommand{\qedsymbol}{\rule{0.7em}{0.7em}}
+
+\begin{proof}
+Let \(p=1\). By \cref{eqn:basis0} \(N_{i,p-1}(t)\) and \(N_{i+1,p-1}(t)\) are either 0 or 1. Thus by \cref{eqn:basisgeneral}, for \(p=1\), \(N_{i,p}^{'}(t)\) is either 
+
+\[ \frac{1}{ t_{i+1} - t_{i} } ~~\text{or}~~ \frac{-1}{ t_{i+2} - t_{i+1} } \]
+
+Assume now that \cref{eqn:basisderivative} is true for \(p-1,~p>1\). Applying the product rule, we differentiate \cref{eqn:basisgeneral} to obtain
+
+\begin{equation}
+\begin{aligned}
+N_{i,p}'(t) &= \frac{1}{t_{i+p} - t_i} N_{i,p-1}(t) + \frac{t-t_i}{t_{i+p}-t_i} N_{i,p-1}^{'}(t)\\
+			&+ \frac{-1}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t) + \frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}}N_{i+1,p-1}^{'}(t)
+\end{aligned}
+\end{equation}
+
+Now substitute in \cref{eqn:basisderivative} for \(N_{i,p-1}^{'}(t)\) and \(N_{i+1,p-1}^{'}(t)\)
+
+\begin{equation}
+\begin{split}
+N_{i,p}'(t) =& \frac{1}{t_{i+p} - t_i} N_{i,p-1}(t) + \frac{-1}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t) \\ 
+& + \frac{t-t_i}{t_{i+p}-t_i} \left( \frac{p-1}{t_{i+p-1} - t_i} N_{i,p-2}(t) - \frac{p-1}{t_{i+p} - t_{i+1}} N_{i+1,p-2}(t) \right) \\
+&+ \frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}} \left( \frac{p-1}{t_{i+p} - t_{i+1}} N_{i+1,p-2}(t) - \frac{p-1}{t_{i+p+1} - t_{i+2}} N_{i+2,p-2}(t) \right)
+\end{split}\raisetag{3\baselineskip}
+\end{equation}
+
+Gather like terms:
+
+\begin{equation}
+\begin{split}
+\label{eqn:gatherterms}
+N_{i,p}'(t) =& \frac{1}{t_{i+p} - t_i} N_{i,p-1}(t)\\
+& + \frac{-1}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t) \\ 
+& + \frac{p-1}{t_{i+p-1} - t_i} ~\frac{t-t_i}{t_{i+p}-t_i} N_{i,p-2}(t)\\
+& + \frac{p-1}{t_{i+p} - t_{i+1}} \left( \frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}} - \frac{t-t_i}{t_{i+p}-t_i}\right)  N_{i+1,p-2}\\
+& - \frac{p-1}{t_{i+p+1} - t_{i+2}}~\frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}} N_{i+2,p-2}(t)
+\end{split}\raisetag{3\baselineskip}
+\end{equation}
+
+Add and subtract 1 from the terms in parenthesis, allowing us to put things in a convenient form shortly.
+
+\begin{equation}
+\begin{split}
+\label{eqn:plusminus1}
+\frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}} - \frac{t-t_i}{t_{i+p}-t_i} =& -1 + \frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}} +1 - \frac{t-t_i}{t_{i+p}-t_i}\\
+	=& -\frac{t_{i+p+1} - t_{i+1}}{t_{i+p+1} - t_{i+1}} + \frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+1}}\\
+	&+ \frac{t_{i+p} - t_{i}}{t_{i+p} - t_{i}} - \frac{t-t_i}{t_{i+p}-t_i}\\
+	=& \frac{t_{i+p} - t}{t_{i+p} - t_{i}} - \frac{t - t_{i+1}}{t_{i+p+1} - t_{i+1}}
+\end{split}\raisetag{3\baselineskip}
+\end{equation}
+
+Apply \cref{eqn:plusminus1} and rearrange \cref{eqn:gatherterms}
+
+\begin{equation}
+\begin{split}
+N_{i,p}'(t) =& \frac{1}{t_{i+p} - t_i} N_{i,p-1}(t)\\
+& + \frac{-1}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t) \\ 
+& + \frac{p-1}{t_{i+p} - t_i} \left( \frac{t-t_i}{t_{i+p-1}-t_i} N_{i,p-2}(t) + \frac{t_{i+p}-t}{t_{i+p}-t_{i+1}} N_{i+1,p-2}(t) \right)\\
+& - \frac{p-1}{t_{i+p+1} - t_{i+1}}\left( \frac{t-t_{i+1}}{t_{i+p}-t_{i+1}} N_{i+1,p-2}(t) + \frac{t_{i+p+1}-t}{t_{i+p+1}-t_{i+2}} N_{i+2,p-2}(t) \right)
+\end{split}\raisetag{3\baselineskip}
+\end{equation}
+
+We can see that the terms in parentheses now are precisely the relation defined in \cref{eqn:basisgeneral}. Substituting in the left hand side of that equation, we are left with
+
+\begin{equation}
+\begin{split}
+N_{i,p}'(t) =& \frac{1}{t_{i+p} - t_i} N_{i,p-1}(t)\\
+& + \frac{-1}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t) \\ 
+& + \frac{p-1}{t_{i+p} - t_i} N_{i,p-1}(t) \\
+& - \frac{p-1}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t)
+\end{split}\raisetag{3\baselineskip}
+\end{equation}
+
+Simplifying, we obtain \cref{eqn:basisderivative}
+
+\[
+N_{i,p}'(t) = \frac{p}{t_{i+p} - t_i} N_{i,p-1}(t) - \frac{p}{t_{i+p+1} - t_{i+1}} N_{i+1,p-1}(t)
+\]
+
+\end{proof}
+
+\end{appendices}
+
 \end{document}
