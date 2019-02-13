@@ -24,8 +24,15 @@ You can run imagemagick from command line. If my frames were named my-frames01.p
 
 There are however some important flags to consider.
 
-- -fuzz 5% -layers Optimize
-The higher fuzz percent compresses the GIF more but is lower quality. However a low fuzz is barely noticable and compresses the GIF a lot. This is explained [here](https://stackoverflow.com/questions/8578926/how-can-i-compress-the-size-of-gif-images-with-imagemagick)
+- ```-fuzz 5% -layers Optimize``` The higher fuzz percent compresses the GIF more but is lower quality. However a low fuzz is barely noticable and compresses the GIF a lot. This is explained [here](https://stackoverflow.com/questions/8578926/how-can-i-compress-the-size-of-gif-images-with-imagemagick)
+
+- ```-delay 8``` The means that you want each frame to appear for 8/100 seconds. Don't go below 2, imagemagick has a bug if you make this number too small and it makes your final GIF very slow. 
+
+- ```-dispose previous``` If your background is transparent you'll probably want to delete the previous frame when the next frame appears.
+
+-```-loop 0``` Makes your GIF loop forever.
+
+See the full documentation [here](https://imagemagick.org/). 
 
 
 
