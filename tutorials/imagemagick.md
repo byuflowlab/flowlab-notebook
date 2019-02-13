@@ -12,6 +12,20 @@ When I installed there were quite a few dependencies that I didn't have, so it t
 
 The first time I used imagemagick was to display turbine design and locations at each iteration of an optimization. I used pyplot to create each frame, and here are a few pointers that would have saved me a lot of time had I known them at the beginning.
 
+- Save your frames as PNG files rather than JPEG. The individual JPEG frames are smaller, but this format compresses the image so there is some small amount of blur. This means that when you make the GIF it will be larger because there will be more pixel changes from frame to frame. 
+
+- Don't use transparency! (in matplotlib.pyplot this means messing with alpha for your colors). This makes a lot more colors in your frame and causes the final GIF to be huge.
+
+### Flags that I used while running imagemagick
+
+You can run imagemagick from command line. If my frames were named my-frames01.png, my-frames02.png, etc. and I wanted to call my animation my-animation.gif, I would navigate to the folder where the frames were saved and run:
+
+```convert my-frames* my-animation.gif```
+
+There are however some important flags to consider.
+
+- -fuzz 5% -layers Optimize
+The higher fuzz percent compresses the GIF more but is lower quality. However a low fuzz is barely noticable and compresses the GIF a lot. This is explained [here](https://stackoverflow.com/questions/8578926/how-can-i-compress-the-size-of-gif-images-with-imagemagick)
 
 
 
