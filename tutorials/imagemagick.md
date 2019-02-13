@@ -5,7 +5,7 @@ imagemagick is a program that can take individual pictures (frames) that you gen
 
 ### Installation
 
-For a Mac you can just use brew to install: #brew install imagemagick
+For a Mac you can just use brew to install: ```tex brew install imagemagick```
 When I installed there were quite a few dependencies that I didn't have, so it took a while to install.
 
 
