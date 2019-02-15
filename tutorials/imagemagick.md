@@ -1,6 +1,8 @@
 # Creating .gif Animations with imagemagick
 #### PJ Stanley
 
+![](small10.gif)
+
 imagemagick is a program that can take individual pictures (frames) that you generate and turn them into an animated .gif file. Here are some quick tips and flags when using the program that will hopefully make your experience easier.
 
 ### Installation
