@@ -135,11 +135,17 @@ N_{i,p}'(t) = \frac{p}{t_{i+p} - t_i} N_{i,p-1}(t) - \frac{p}{t_{i+p+1} - t_{i+1
 
 (See \cref{sec:basisderivativeproof} for the proof for this.) In general, the $k$th derivative is given by
 
-\begin{equation}N_{i,p}^{(k)}(t) = p \left( \frac{N_{i,p-1}^{(k-1)}(t)}{t_{i+p} - t_i} - \frac{N_{i+1,p-1}^{(k-1)}(t)}{t_{i+p+1} - t_{i+1}} \right) \end{equation}
+\begin{equation}
+\label{eqn:basisder1}
+	N_{i,p}^{(k)}(t) = p \left( \frac{N_{i,p-1}^{(k-1)}(t)}{t_{i+p} - t_i} - \frac{N_{i+1,p-1}^{(k-1)}(t)}{t_{i+p+1} - t_{i+1}} \right)
+\end{equation}
 
 or in terms of $N_{i,p-k}(t), \ldots, N_{i+k,p-k}(t)$ rather than derivatives:
 
-\begin{equation} N_{i,p}^{(k)}(t) = \frac{p!}{(p-k)!} \sum^k_{j=0} a_{k,j} N_{i+j,p-k}(t)  \end{equation}
+\begin{equation}
+\label{eqn:basisder2}
+	N_{i,p}^{(k)}(t) = \frac{p!}{(p-k)!} \sum^k_{j=0} a_{k,j} N_{i+j,p-k}(t
+\end{equation}
 
 with
 
@@ -187,20 +193,73 @@ and our expression becomes
 
 %TODO Add an example here showing the fitting of a quarter circle.
 
+We can also describe an equivalent, but nonrational (piecewise B-Spline) curve by applying the weights to the control points through the following projection
+
+\begin{equation}
+	P^w_i = [x_iw_i,y_iw_i,z_iw_i,w_i]
+\end{equation}
+
+This gives us the nonrational curve
+
+\begin{equation}
+	\textbf{C}^w(t) = \sum^n_{i=0}N_{i,p}(t) \textbf{P}^w_i
+\end{equation}
+
+Both \(\textbf{C}(t)\) and \(\textbf{C}^w(t)\) are typically referred to as NURBS curves, despite \(\textbf{C}^w(t)\) not actually being rational.
+
 \subsection{NURBS Derivatives}
-We can also express the definition of a NURBS curve as
+In order to make things easier, we want to find the derivatives of NURBS curves in terms of the nonrational form. The procedure proceeds as follows.
 
-\begin{equation} \textbf{C}(t) = \frac{ w(t) \textbf{C}(t) }{ w(t) } = \frac{ \textbf{A}(t) }{ w(t) }   \end{equation}  
+Let 
 
-where $\textbf{A}(t) $ is the numerator of equation \cref{eqn:nurbsdef}.
+\begin{equation}
+	\textbf{C}^w(t) = [\textbf{A}(t),~w(t)]
+\end{equation}
 
-The derivative, $\textbf{C}'(t)$, can then be expressed as
+where \(\textbf{A}(t)\) is the vector of the first three elements, and \(w(t)\) is the final element, of \(\textbf{C}^w(t)\). Next we take \(\textbf{C}(t)\) and multiply by 1, and put it in terms of \(\textbf{A}(t)\) and \(w(t)\), noting that \(w(t)=\sum^n_{i=0}N_{i,p}(t) w_i \)
 
-\begin{equation} \textbf{C}'(t) = \frac{ \textbf{A}'(t) - w'(t) \textbf{C}(t) }{ w(t) }   \end{equation}
+\begin{equation}
+\label{eqn:nonrationalequiv}
+	\textbf{C}(t) = \frac{ w(t) \textbf{C}(t) }{ w(t) } = \frac{ \textbf{A}(t) }{ w(t) }
+\end{equation}
 
-and the $k$th derivative, $\textbf{C}^{ (k) }  (t)$, can be expressed as
+we can thus see that \(\textbf{A}(t)\) is also the numerator of equation \cref{eqn:nurbsdef}.
 
-\begin{equation} \textbf{C}^{(k)}(t) = \frac{ \textbf{A}^{(k)}(t) - \displaystyle \sum^k_{i=1} w^{(i)} (t) \textbf{C}^{(k-i)} (t) }{ w(t) }   \end{equation}
+Taking the first derivative of $\textbf{C}'(t)$ via the quotient rule yields
+
+\begin{equation}
+	\textbf{C}'(t) = \frac{ w(t)\textbf{A}'(t) - w'(t) \textbf{A}(t) }{ w(t)^2 }
+\end{equation}
+
+substituting in for \(\textbf{A}(t)\) from the relation from \cref{eqn:nonrationalequiv}
+\begin{equation} 
+	\textbf{C}'(t) = \frac{  w(t)\textbf{A}'(t) - w'(t) \textbf{C}(t)w(t) }{ w(t)^2 }
+\end{equation}
+
+then simplifying gives us the expression for the first derivative of \(\textbf{C}(t) \):
+\begin{equation} 
+\textbf{C}'(t) = \frac{ \textbf{A}'(t) - w'(t) \textbf{C}(t) }{ w(t) }
+\end{equation}
+
+For higher order derivatives, we apply the generalized chain rule to \(\textbf{A}(t)\)
+
+\begin{equation} 
+\textbf{A}^{(k)}(t) = (w(t)\textbf{C}(t))^{(k)} = \displaystyle \sum^k_{i=0}\binom{k}i w^{(i)} (t) \textbf{C}^{(k-i)} (t) 
+\end{equation}
+
+taking out the first element in the summand (where $i=0$)
+
+\begin{equation} 
+\textbf{A}^{(k)}(t) = w(t)\textbf{C}^{(k)}(t) + \displaystyle \sum^k_{i=1}\binom{k}i w^{(i)} (t) \textbf{C}^{(k-i)} (t) 
+\end{equation}
+
+and then rearranging for \(\textbf{C}^{(k)}(t)\), we arrive at the expression for the $k$th derivative of the NURBS curve.
+
+\begin{equation} 
+	\textbf{C}^{(k)}(t) = \frac{ \textbf{A}^{(k)}(t) - \displaystyle \sum^k_{i=1} \binom{k}i w^{(i)}(t) \textbf{C}^{(k-i)} (t) }{ w(t) }
+\end{equation}
+
+The derivatives for \(\textbf{A}^{(k)}(t)\) and \(w^{(i)}(t)\) can be calculated by applying the $k$th derivatives of their basis functions (see \cref{eqn:basisder1} or \cref{eqn:basisder2}).
 
 \subsection{Refinement}
 
