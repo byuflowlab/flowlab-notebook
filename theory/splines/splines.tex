@@ -263,8 +263,36 @@ The derivatives for \(\textbf{A}^{(k)}(t)\) and \(w^{(i)}(t)\) can be calculated
 
 \subsection{Refinement}
 
-\subsubsection{Bézier Extraction}
-In order to understand the different kinds of spline refinement discussed below, we must first discuss Bézier extraction.
+%\subsubsection{Bézier Extraction}
+%In order to understand the different kinds of spline refinement discussed below, we must first discuss Bézier extraction.
+
+\subsubsection{Knot Insertion}
+Knot insertion, sometimes called h-refinement, is a process by which additional knots are inserted into the knot vector, allowing for greater curve flexibility without increasing the curve order. The process of inserting a single knot begins simply by adding a knot, \(\bar{t}\), into the knot vector, \(\mathcal{T}\). If we let the new knot be between two of the existing knots such that \(\bar{t} \in [t_{k},t_{k+1})\), then we form a new knot vector defined as \(\mathcal{T}=\{\bar{t}_0=t_0,\ldots,\bar{t}_k=t_k, \bar{t}_{k+1}=\bar{t},\bar{t}_{k+2}=\bar{t}_{k+1},\ldots,\bar{t}_{m+1}=\bar{t}_m \}\). We can now express some NURBS curve as
+
+\begin{equation}
+\label{eqn:knotinsertion}
+	\mathbf{C}^w(u) = \sum^{n}_{i=0} N_{i,p}(u) \mathbf{P}_i^w = \sum^{n+1}_{i=0} \bar{N}_{i,p}(u) \mathbf{Q}_i^w
+\end{equation}
+
+where \(\bar{N}_{i,p}(u)\) are the bases associated with the new knot vector, and \(\mathbf{Q}_i^w\) are the new set of control points that yield the equivalent curve. Although adding an element to the knot vector is what knot insertion is named for, the largest component of the process is finding the new control points, \(\mathbf{Q}_i^w\). It should be noted that this process in no way changes the geometric or parametric representation of the curve, but rather is a process of changing the vector space basis. This could be done by solving the system of equations presented in \cref{eqn:knotinsertion}, but because the curve has compact support, which is to say there are no more than \(p+1\) non-zero basis functions in the range \([t_{k},t_{k+1})\), the control points associated with the portions of the curve outside the range where the knot was added are unaffected. This greatly simplifies the solution for \(\mathbf{Q}_i^w\) since we only need to find $p$ new control points. This solution can be expressed as follows.
+
+\begin{equation}
+\label{eqn:knotinsertioncpcalc}
+	\mathbf{Q}_i^w = \alpha_i \mathbf{P}_i^w + (1-\alpha_i)\mathbf{P}_{i-1}^w
+\end{equation}
+
+\[
+\alpha_i = 
+\begin{cases}
+1 & i\leq k-p\\
+\frac{\bar{t}-t_i}{t_{i+p} - t_i} & k-p+1 \leq i \leq k\\
+0 & i \geq k+1
+\end{cases}
+\]
+
+%TODO Show an example (the one in the docs is fine)
+
+The process to add multiple knots is referred to as knot refinement.  The process is more or less identical to knot insertion. Knots can either be added one at a time, or in groups. The control points outside the range where new knots are being inserted are unchanged, and any control points associated with sections of the curve where the new knots are being inserted are solved for with the same \cref{eqn:knotinsertioncpcalc} as the single knot case. It should also be noted that multiples of the same knot can be added without issue.
 
 
 \subsubsection{Degree Elevation}
@@ -272,10 +300,7 @@ Degree elevation, sometimes called p-refinement, is a process by which a p-degre
 
 %TODO Show an example (the one in the docs is fine)
 
-\subsubsection{Knot Insertion}
-Knot insertion, sometimes called h-refinement, is a process by which extra knots are inserted into the knot vector, basically adding more Bézier curves to the spline where the knots are inserted, allowing for greater curve flexibility without increase the curve order.
 
-%TODO Show an example (the one in the docs is fine)
 
 %\section{Tensor Product Surfaces}
 
