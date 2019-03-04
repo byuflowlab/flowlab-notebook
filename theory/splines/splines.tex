@@ -10,7 +10,7 @@
 \section{Introduction}
 \label{sec:splinesintro}
 
-Splines are useful in many applications including, but not limited to: Engineering, Architecture, Graphic Design, and Mathematics. Splines began as physical, rather than mathematical objects. In the ship building, and later the aircraft building, industry, as well as other architectural applications, drafters would use thin pieces of wood or metal called splines that they would bend through key points to create smooth interpolative curves.  Today, splines are used much in the same way, albeit primarily in virtual applications.  In engineering, splines are most often used for data interpolation and graphic design/representation (CAD). Simply put, splines are piecewise polynomial functions; thus they behave more or less as do polynomials, but have much greater flexibility and are therefore often preferred for accuracy in interpolation and flexibility in design. There are many kinds of splines, but here we discuss Bézier Curves, B-Splines, and NURBS.
+Splines are useful in many applications including, but not limited to: Engineering, Architecture, Graphic Design, and Mathematics. Splines began as physical, rather than mathematical objects. In the ship building, and later the aircraft building, industry, as well as other architectural applications, drafters would use thin pieces of wood or metal called splines that they would bend through key points to create smooth interpolative curves.  Today, splines are used much in the same way, albeit primarily in virtual applications.  In engineering, splines are most often used for data interpolation and graphic design/representation (CAD). Simply put, splines are piecewise polynomial functions; thus they behave more or less as do polynomials, but have much greater flexibility and are therefore often preferred for accuracy in interpolation and flexibility in design. There are many kinds of splines, but here we discuss Bézier Curves, B-Splines, and NURBS. (For implementations of some of the more useful concepts described here, refer to \url{http://flow.byu.edu/Splines.jl/})
 
 \section{Bézier Curves}
 \subsection{Understanding the Parametric Nature of Bézier Curves}
@@ -271,10 +271,10 @@ Knot insertion, sometimes called h-refinement, is a process by which additional 
 
 \begin{equation}
 \label{eqn:knotinsertion}
-	\mathbf{C}^w(u) = \sum^{n}_{i=0} N_{i,p}(u) \mathbf{P}_i^w = \sum^{n+1}_{i=0} \bar{N}_{i,p}(u) \mathbf{Q}_i^w
+	\mathbf{C}^w(t) = \sum^{n}_{i=0} N_{i,p}(t) \mathbf{P}_i^w = \sum^{n+1}_{i=0} \bar{N}_{i,p}(t) \mathbf{Q}_i^w
 \end{equation}
 
-where \(\bar{N}_{i,p}(u)\) are the bases associated with the new knot vector, and \(\mathbf{Q}_i^w\) are the new set of control points that yield the equivalent curve. Although adding an element to the knot vector is what knot insertion is named for, the largest component of the process is finding the new control points, \(\mathbf{Q}_i^w\). It should be noted that this process in no way changes the geometric or parametric representation of the curve, but rather is a process of changing the vector space basis. This could be done by solving the system of equations presented in \cref{eqn:knotinsertion}, but because the curve has compact support, which is to say there are no more than \(p+1\) non-zero basis functions in the range \([t_{k},t_{k+1})\), the control points associated with the portions of the curve outside the range where the knot was added are unaffected. This greatly simplifies the solution for \(\mathbf{Q}_i^w\) since we only need to find $p$ new control points. This solution can be expressed as follows.
+where \(\bar{N}_{i,p}(t)\) are the bases associated with the new knot vector, and \(\mathbf{Q}_i^w\) are the new set of control points that yield the equivalent curve. Although adding an element to the knot vector is what knot insertion is named for, the largest component of the process is finding the new control points, \(\mathbf{Q}_i^w\). It should be noted that this process in no way changes the geometric or parametric representation of the curve, but rather is a process of changing the vector space basis. This could be done by solving the system of equations presented in \cref{eqn:knotinsertion}, but because the curve has compact support, which is to say there are no more than \(p+1\) non-zero basis functions in the range \([t_{k},t_{k+1})\), the control points associated with the portions of the curve outside the range where the knot was added are unaffected. This greatly simplifies the solution for \(\mathbf{Q}_i^w\) since we only need to find $p$ new control points. This solution can be expressed as follows.
 
 \begin{equation}
 \label{eqn:knotinsertioncpcalc}
@@ -296,7 +296,32 @@ The process to add multiple knots is referred to as knot refinement.  The proces
 
 
 \subsubsection{Degree Elevation}
-Degree elevation, sometimes called p-refinement, is a process by which a p-degree spline is represented exactly in a higher order space.
+Degree elevation, sometimes called p-refinement, is a process by which a p-degree spline is represented exactly in a higher order space. The process of degree elevation is very similar to that of knot refinement. We simply take a $p$-degree NURBS curve and embed it into a higher dimensional space.
+
+\begin{equation}
+\label{eqn:degreeelevation}
+\mathbf{C}_p^w(t) = \mathbf{C}_{p+1}^w(t) = \sum^{\hat{n}}_{i=0} N_{i,p+1}(t) \mathbf{Q}_i^w
+\end{equation}
+
+The method of degree elevation is to determine the knot vector and control points that define the identical curve in higher dimensional space.  Obtaining the knot vector is quite simple. In order for the elevated curve to be the same, we need it to have knots in the same locations, with the same continuity as the original knot vector.  The orginal knot vector has the form
+
+\begin{equation}
+	\mathcal{T} = \{t_0,\ldots,t_m\} = \{\underbrace{a,\ldots,a}_{p+1},\underbrace{t_1,\ldots,t_m}_{m_1},\ldots,\underbrace{t_s,\ldots,t_s}_{m_s},\underbrace{b,\ldots,b}_{p+1} \}
+\end{equation}
+
+where \(m_1,\ldots,m_s\) are the individual knot multiplicities. To obtain the knot vector for the higher dimensioned curve, we simply add as many multiples of the original knots as degrees we are elevating. If we are elevating the curve by degree 1, for example, the new knot vector becomes
+
+\begin{equation}
+\hat{\mathcal{T}} = \{t_0,\ldots,t_{\hat{m}}\} = \{\underbrace{a,\ldots,a}_{p+2},\underbrace{t_1,\ldots,t_m}_{m_1+1},\ldots,\underbrace{t_s,\ldots,t_s}_{m_s+1},\underbrace{b,\ldots,b}_{p+2} \}
+\end{equation}
+
+where \(\hat{m} = m+s+2\).  Having added knots, we now solve for the new set of basis functions using our elevated knot vector, the elevated degree \(p\), and \(\hat{n}\) where \(\hat{n} = n+s+1\).  After we have the new knots and bases, we finally solve for the control points that define the identical curve, very much like our knot insertion process where we have a system of equations with which we can solve for the control points.
+
+\begin{equation}
+\sum^{\hat{n}}_{i=0} N_{i,p+1}(t) \mathbf{Q}_i^w = \sum^{n}_{i=0} N_{i,p}(t) \mathbf{P}_i^w
+\end{equation}
+
+There are more efficient algorithms than solving this system to finding these control points. Like the efficient algorithms for knot refinement, they involve Bézier extraction, or degree elevating sections of the curve one at a time.
 
 %TODO Show an example (the one in the docs is fine)
 
