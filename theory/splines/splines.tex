@@ -292,8 +292,28 @@ where \(\bar{N}_{i,p}(t)\) are the bases associated with the new knot vector, an
 
 %TODO Show an example (the one in the docs is fine)
 
-The process to add multiple knots is referred to as knot refinement.  The process is more or less identical to knot insertion. Knots can either be added one at a time, or in groups. The control points outside the range where new knots are being inserted are unchanged, and any control points associated with sections of the curve where the new knots are being inserted are solved for with the same \cref{eqn:knotinsertioncpcalc} as the single knot case. It should also be noted that multiples of the same knot can be added without issue.
+If multiple of the same knot are being added, this expression can be generalized as follows:
 
+\begin{equation}
+\label{eqn:genknotinsertioncpcalc}
+\mathbf{Q}_{i,r}^w = \alpha_{i,r} \mathbf{Q}_{i,r-1}^w + (1-\alpha_{i,r})\mathbf{Q}_{i-1,r-1}^w
+\end{equation}
+
+\[
+\alpha_i = 
+\begin{cases}
+1 & i\leq k-p+r-1\\
+\frac{\bar{t}-t_i}{t_{i+p-r+1} - t_i} & k-p+r \leq i \leq k-s\\
+0 & i \geq k-s+1
+\end{cases}
+\]
+
+where $r$ iterates over the number of iterations that are taking place, such that \(\mathbf{Q}_{i,0}^w = \mathbf{P}_{i}^w\), and $s$ is the number of unique internal knots.
+
+The process to add multiple different knots simultaneously is referred to as knot refinement.  The process is more or less identical to knot insertion. Knots can either be added one at a time, or in groups. The control points outside the range where new knots are being inserted are unchanged, and any control points associated with sections of the curve where the new knots are being inserted are solved for with the same \cref{eqn:knotinsertioncpcalc} as the single knot case. 
+
+\subsubsection{Bézier Extraction}
+Bézier extraction is the process of inserting multiplicities of the elements of the knot vector, such that the B-Spline is decomposed into a piecewise Bézier curve. Meaning that there are no internal knots on each Bézier segment, and the bases become exactly Bézier bases on each segment. Bézier extraction can be used on the fly in order to make the process of knot refinement and degree elevation more efficient, in that individual Bézier segments can have knots inserted, or be degree elevated, removing the need to solve a large system of equations for the new control points.
 
 \subsubsection{Degree Elevation}
 Degree elevation, sometimes called p-refinement, is a process by which a p-degree spline is represented exactly in a higher order space. The process of degree elevation is very similar to that of knot refinement. We simply take a $p$-degree NURBS curve and embed it into a higher dimensional space.
