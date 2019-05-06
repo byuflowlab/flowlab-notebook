@@ -159,7 +159,7 @@ Let us express the function $u$ in terms of basis functions, and perform a trans
 \int_{-1}^{1} T(P,Q(\xi)) \sum^{nb}_{c=1} \left[ N^c(\xi) \right] J_b(\xi) \mathrm{d}\xi + \int_{-1}^{1} T(P,Q(\xi)) \sum^{na}_{c=1} \left[ N^c(\xi) \right]  J_a(\xi) \mathrm{d}\xi 
 \end{equation}
 
-where $\mathrm{d}s = J(\xi) \mathrm{d}\xi$ where $J(\xi) = \mathrm{d}s/\mathrm{d}\xi$, and $nb$ and $na$ are the number of basis functions used to define $u$ on the ranges $\Gamma_b$ and $\Gamma_a$ respectively. Only one of the basis functions on each element will be non-zero at the singular point P, so we separate out the regular integrals and compute those with standard Gauss-Legendre quadrature described in equation \ref{eqn:quadrature}. We take the singular integrals, and define $g_a(\xi)$ and $g_b(\xi)$, such that $g(\xi)=T(P,Q(\xi)) N^c(\xi)$, where $c=1$ on $\Gamma_a$ and $c=nb$ on $\Gamma_b$. We then write the Cauchy principal value expression as
+where $J(\xi) = \mathrm{d}s/\mathrm{d}\xi$, and $nb$ and $na$ are the number of basis functions used to define $u$ on the ranges $\Gamma_b$ and $\Gamma_a$ respectively. Only one of the basis functions on each element will be non-zero at the singular point P, so we separate out the regular integrals and compute those with standard Gauss-Legendre quadrature described in equation \ref{eqn:quadrature}. We take the singular integrals, and define $g_a(\xi)$ and $g_b(\xi)$, such that $g(\xi)=T(P,Q(\xi)) N^c(\xi)$, where $c=1$ on $\Gamma_a$ and $c=nb$ on $\Gamma_b$. We then write the Cauchy principal value expression as
 
 
 \begin{equation}
