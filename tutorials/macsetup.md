@@ -2,7 +2,7 @@
 
 #### Andrew Ning
 
-Almost all of these commands are meant to be executed within Terminal so these instructions expect a basic understanding of Terminal usage.  You should not need to use [sudo](https://en.wikipedia.org/wiki/Sudo) for any command unless otherwise noted.  If you need sudo for anything else that's an indication that you're doing something wrong.  You may not know what some applications or commands are.  Ask your fellow students or me when we next meet.
+Almost all of these commands are meant to be executed within Terminal so these instructions expect a basic understanding of Terminal usage.  You should not need to use [sudo](https://en.wikipedia.org/wiki/Sudo) for any command unless otherwise noted.  If you need sudo for anything else that's an indication that you're doing something wrong.  You may not know what some applications or commands are.  Ask your fellow students or me.
 
 - Update OS X via the command line.  Or open up the Mac App Store, and update all.
 ```bash
@@ -159,10 +159,10 @@ $ git config --global user.name "Your Name Here"
 $ git config --global user.email your@email.com
 ```
 
-- Install miniconda if you are going to program in  Python.  Conda is a separate package manager just for Python.  Typically it comes with a bunch of stuff pre-bundled.  The mini version strips it down to the essentials so we can just install what we need.
+- Install miniconda if you are going to program in Python.  Conda is a separate package manager just for Python.  Typically it comes with a bunch of stuff pre-bundled.  The mini version strips it down to the essentials so we can just install what we need.
 ```bash
 $ cd ~/Downloads
-$ wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh
+$ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
 $ bash miniconda.sh 
 $ conda update conda
 $ conda install numpy scipy matplotlib swig
@@ -175,7 +175,7 @@ $ cd pyoptsparse
 python setup.py install
 ```
 
-- If you use Python and need openmdao (note that you use should conda instead of pip whenever possible, but openmdao is not available through conda).  I'd also check `which pip`
+- If you use Python and need openmdao (note that you use should conda instead of pip whenever possible, but openmdao is not available through conda).  I'd also check `which pip` to make sure you are using the right one.
 ```bash
 $ pip install openmdao
 ```
@@ -194,7 +194,6 @@ $ apm install latextools uber-juno
 - If you want Matlab or any Adobe products  (potentially Acrobat and maybe Illustrator) you need to install from <https://software.byu.edu>.
 
 - Microsoft Office you can install from <https://office.byu.edu>
-
 
 - From the Mac App Store I recommend either Better Snap Tool or Magnet.  They allow you to define keyboard shortcuts to snap your windows left/right/fullscreen (with absurd amounts of customization if you want).  Great for putting two documents side-by-side.  
 
