@@ -92,6 +92,9 @@ It differs from reference management systems like Papers or Mendeley in that it 
 - Create a new publication (cmd-n or the big green plus button).  Notice in the dropdown menu that you can choose different styles of publications.  These correspond to the recognized types in BibTeX and the corresponding fields automatically update.  If you've never created a BibTeX file manually then you might not appreciate how convenient this is.  
 - On the right hand side of this dialog you can drop in files, which is useful for storing the associated PDF. 
 - One of the fields is `keywords`.  Keywords don't show up in your LaTeX document, they are purely for your own organizational benefit.  Keywords populate on the left hand side of the app so you can filter by them.  One publication can have multiple keywords.
+- The `Annote` section can be a useful section to jot down notes and summaries for each paper so you can remember it later. Like Keywords, these notes do not show up in your LaTeX document, although there are ways to display them if desired (such as for literature reviews). 
+- Right-click on the left menu in the app to create groups. Static groups require manual sorting by dragging and dropping papers into those groups. Smart groups populate automatically based on user-specified criteria. Lots of criteria can be used, such as read/unread, specific words in the title or abstract, date, author, rating, etc. This could be a good way to keep track of unread high-impact papers (e.g., specifying papers that are unread and have been given a high rating).
+- To mark a paper as read, pull up its info and check the box at the bottom next to `Read`.
 - You can sort and subsort publications by any of the fields at the top.  Right click on the top to add/remove fields.
 - Open preferences (cmd-comma -- the keyboard shortcut to open preferences for almost any Mac app)
     - General: I recommend having it open your new master bibliography file on launch.
