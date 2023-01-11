@@ -67,7 +67,7 @@ Header:
 %\usepackage{cite}
 %\usepackage{doi}
 %\usepackage[caption=false,justification=raggedright,singlelinecheck=false]{subfig}
-%\usepackage{booktabs} % better tables
+%\usepackage{booktabs}
 %\usepackage[capitalise]{cleveref}
 
 \begin{document}
@@ -80,6 +80,24 @@ Header:
 
 \end{document}
 ```
+
+- geometry sets margins (for good typesetting you really should stay with the defaults rather than using small 1 in margins, but changing margins is often a typical requirement
+- graphicx is used to insert figures
+- amsmath contains many useful math environments and commands 
+- nomencl is used if you need to create nomenclature
+- hyperref creates hyperlinks for your citations, figures make it eaier to navigate
+- cite groups sequential citations together ([1,2,3,4,7,8] becomes [1-4,7-8])
+- subfig is used if need subfigures
+- booktabs improved the spacing and look of tables
+- cleveref consistently formats cross referencing styles (Figure, Fig., fig., etc.), and allows you to change them all easily
+
+# Some Gotchas
+
+- If you use a period that doesn't end a sentence, you must use a tilde or the spacing will be wrong.  For example, Dr.~Bob.
+- Quote properly: ````quote''`` not ``"quote"`` (opening backticks and closing single quotes)
+- Use hyphens and dashes properly: - hyphen, -- n-dash, --- m-dash.  
+- Actual words or units in equations should be typeset with \text (i.e., $V = 30 \text{m/s}$).
+- If using an inline equation, rather than a displayed equation, use "/" instead of "\frac".
 
 
 # BibTeX with BibDesk
